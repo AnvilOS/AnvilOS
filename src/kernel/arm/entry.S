@@ -62,7 +62,7 @@ SysTick_Handler:
 
 
 /****************************************
- * The vector table in itas own section
+ * The vector table in its own section
  ***************************************/
         .section    ".vector_tbl"
 

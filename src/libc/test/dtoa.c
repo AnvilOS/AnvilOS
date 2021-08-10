@@ -209,6 +209,14 @@
  *	used for input more than STRTOD_DIGLIM digits long (default 40).
  */
 
+#define IEEE_8087
+//#define Arith_Kind_ASL 1
+//#define Long long
+//#define Intcast (int)(long)
+//#define Double_Align
+//#define X64_bit_pointers
+#define NO_BF96
+
 #ifndef Long
 #define Long int
 #endif
@@ -335,7 +343,7 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
 #endif /* Bad_float_h */
 
 #ifndef __MATH_H__
-#include "math.h"
+//#include "math.h"
 #endif
 
 #ifdef __cplusplus
@@ -3429,7 +3437,7 @@ retlow1:
 #endif /* NO_STRTOD_BIGCOMP */
 
  double
-strtod(const char *s00, char **se)
+gdtoa_strtod(const char *s00, char **se)
 {
 	int bb2, bb5, bbe, bd2, bd5, bbbits, bs2, c, e, e1;
 	int esign, i, j, k, nd, nd0, nf, nz, nz0, nz1, sign;
@@ -4949,6 +4957,8 @@ freedtoa(char *s)
  *	   calculation.
  */
 
+int GGG;
+
  char *
 dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve, char *buf, size_t blen)
 {
@@ -5203,6 +5213,8 @@ dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve, char
 	if (ds < 0. && ds != k)
 		k--;	/* want k = floor(ds) */
 	k_check = 1;
+	GGG = k;
+	//printf("K=%d\n", k);
 	if (k >= 0 && k <= Ten_pmax) {
 		if (dval(&u) < tens[k])
 			k--;
@@ -6025,7 +6037,9 @@ dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve, char
 			}
 
 		for(i = 1;;i++) {
-			dig = quorem(b,S) + '0';
+		    extern int gg1;
+		    ++gg1;
+		    dig = quorem(b,S) + '0';
 			/* Do we yet have the shortest decimal string
 			 * that will round to d?
 			 */
@@ -6185,7 +6199,7 @@ dtoa_r(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve, char
 	}
 
  char *
-dtoa(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve)
+gdtoa_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve)
 {
 	/*	Sufficient space is allocated to the return value
 		to hold the suppressed trailing zeros.

@@ -46,8 +46,14 @@ void _Anvil_xint_delete(_Anvil_xint *x)
     x->ppool->p -= x->capacity;
 }
 
+int biggest;
+
 void _Anvil_xint_resize(_Anvil_xint *x, int new_size)
 {
+    if (new_size > biggest)
+    {
+        biggest = new_size;
+    }
     if (new_size <= x->size)
     {
         x->size = new_size;

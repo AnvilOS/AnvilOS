@@ -5,23 +5,23 @@
 #include "_Anvil_double.h"
 #include "_Anvil_xint.h"
 
-char ret_str[300];
+char ret_str[1000];
 
-int cc0, cc1, cc2, cc3, cc4, cc5, cc6;
+int cc0, cc1, cc2, cc3, cc4, cc5, cc6, cc7;
 
-static const int xint_size = 40;
+static const int xint_size = 26;
 
-char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place_parm, int *pk)
+char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place, int *pk)
 {
     _Anvil_xint_mempool mempool;
     _Anvil_xint R;
     _Anvil_xint S;
-    _Anvil_xint TEMP;
+    
+    int no_print = 0;
 
     uint32_t U;
     int R5e=0, S5e=0;
     int R2e=0, S2e=0;
-    int cutoff_place = cutoff_place_parm;
 
     char *pret_str = ret_str;
     
@@ -141,27 +141,21 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
     _Anvil_xint_mul_int(&S, 10);
     ++S5e; ++S2e;
 
-    //printf("Loop1=%d\n", loop_cnt);
+//    //printf("Loop1=%d\n", loop_cnt);
+//
+//    // In the next part of the algorithm we need to compare
+//    // 2*R + M+ with 2*S
+//
+//    // Let TEMP = 2 * R + M+
+//    _Anvil_xint_lshift(&R, &R, 1);
+//
+//    ///////////////////////////////////////
+//    // Temporarily set S to S * 2
+//    _Anvil_xint_lshift(&S, &S, 1);
+//    ///////////////////////////////////////
 
-    // In the next part of the algorithm we need to compare
-    // 2*R + M+ with 2*S
-
-    // Let TEMP = 2 * R + M+
-    _Anvil_xint_init(&mempool, &TEMP, xint_size);
-    _Anvil_xint_lshift(&TEMP, &R, 1);
-
-    ///////////////////////////////////////
-    // Temporarily set S to S * 2
-    _Anvil_xint_lshift(&S, &S, 1);
-    ///////////////////////////////////////
-
-    int saved_k = k;
-
-    int loop = 0;
-    do
-    {
         // while TEMP >= 2 * S
-        while (_Anvil_xint_cmp(&TEMP, &S) >= 0)
+    while (_Anvil_xint_cmp(&R, &S) >= 0)
         {
             // S = S * B
             // k = k + 1
@@ -175,34 +169,44 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
         switch (cutoff_mode)
         {
             case e_relative:
-                cutoff_place = cutoff_place_parm + k;
-                // no break
+            cutoff_place += k;
+            break;
             case e_absolute:
+            if (k <= cutoff_place)
             {
-                // This is the Dragon4 CutoffAdjust
-                int a = cutoff_place - k;
-                if (cutoff_mode == e_relative && a > -1)
+                _Anvil_xint_lshift(&R, &R, 1);
+                ++R2e;
+                no_print = 1;
+//                    _Anvil_xint_print("R: ", &R);
+//                    _Anvil_xint_print("S: ", &S);
+                int cmp = _Anvil_xint_cmp(&R, &S);
+                if (k == cutoff_place && cmp > 0)
                 {
-                    a = -1;
+                    // Output a 1
+                    *pret_str++ = '1';
                 }
-                if (cutoff_mode == e_absolute && saved_k < cutoff_place_parm)
+                else
                 {
-                    k += a;
-                    a = 0;
+                    // Output a 0 but don't print it
+                }
+                k = cutoff_place;
                 }
                 break;
             }
-        }
-    } while (loop);
 
-    ++S2e;
-#if 1
+//    ++R2e;
+//    ++S2e;
+#if 0
     // Check all our variables are correct
+    _Anvil_xint TEMP;
+    _Anvil_xint_init(&mempool, &TEMP, xint_size);
     _Anvil_xint_assign_64(&TEMP, f);
     _Anvil_xint_lshift(&TEMP, &TEMP, R2e);
     _Anvil_xint_mul_5exp(&TEMP, R5e);
     if (_Anvil_xint_cmp(&TEMP, &R) != 0)
     {
+        _Anvil_xint_print("R   : ", &R);
+        _Anvil_xint_print("TEMP: ", &TEMP);
         printf("R wrong\n");
     }
     _Anvil_xint_assign_64(&TEMP, 1);
@@ -212,24 +216,16 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
     {
         printf("S wrong\n");
     }
+    _Anvil_xint_delete(&TEMP);
 #endif
-
-    if (R2e && S2e)
-    {
-        //printf("x2x %d %d\n", R2e, S2e);
-    }
-    if (R5e && S5e)
-    {
-        //printf("x5x %d %d\n", R5e, S5e);
-    }
 
     // LOOP
     // S already holds 2S so let's make R be 2R
-    _Anvil_xint_lshift(&R, &R, 1);
+    //_Anvil_xint_lshift(&R, &R, 1);
 
     // The original Dragon4 algorithm doesn't have this test but it's
     // certainly needed
-    if (1)
+    if (!no_print)
     {
         // The 'div_small' algorithm requires the denominator to have the top
         // bit in its top word set. Scale every thing to make this true
@@ -237,7 +233,7 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
         _Anvil_xint_lshift(&R, &R, 31-hbit);
         _Anvil_xint_lshift(&S, &S, 31-hbit);
 
-        int got_non_zero = 0;
+        U = 0;
 
         while (1)
         {
@@ -250,31 +246,47 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
 
             U = _Anvil_xint_div_small(&R, &S);
             
-            if (k == cutoff_place)
+            if (k <= cutoff_place || _Anvil_xint_is_zero(&R))
             {
                 break;
             }
-            if (U)
-            {
-                got_non_zero = 1;
-            }
-            if (got_non_zero)
-            {
                 *pret_str++ = U + 0x30;
             }
-        }
 
         // The loop is done so output the final digit
         // Scale R up by 2
         _Anvil_xint_lshift(&R, &R, 1);
         int cmp = _Anvil_xint_cmp(&R, &S);
-        if (cmp <= 0)
+        if (cmp < 0 || (cmp == 0 && (U & 1) == 0))
         {
             *pret_str++ = U + 0x30;
         }
         else
         {
-            *pret_str++ = U + 1 + 0x30;
+            *pret_str = U + 1 + 0x30;
+            while (*pret_str == '9' + 1)
+            {
+                // If we stopped because we hit the cutoff place or ran out
+                // of precision it might be that U is 9
+                // This is bad because we can't simply increment it. We need
+                // to roll the carries all the way back through our string.
+                if (pret_str == ret_str)
+                {
+                    *pret_str = '1';
+                    ++k;
+                    break;
+                }
+                --pret_str;
+                *pret_str += 1;
+                ++k;
+            }
+            ++pret_str;
+        }
+        // Remove trailing zeroes
+        while (*(pret_str-1) == '0')
+        {
+            --pret_str;
+            ++k;
         }
     }
 
@@ -283,7 +295,6 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
 
     _Anvil_xint_delete(&R);
     _Anvil_xint_delete(&S);
-    _Anvil_xint_delete(&TEMP);
     _Anvil_xint_mempool_free(&mempool);
 
     return ret_str;
@@ -298,6 +309,8 @@ char *_Anvil_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign, char 
     int32_t p = 0;
     int cutoff_mode = mode;
     int cutoff_place = ndigits;
+    
+    memset(ret_str, 0, sizeof(ret_str));
     
     //
     // Our double is f * 2^(e-p)
