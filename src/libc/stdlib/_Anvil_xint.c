@@ -12,43 +12,28 @@
 static void trim_zeroes(_Anvil_xint *x);
 static int get_highest_word(_Anvil_xint *x);
 static int get_highest_bit(uint32_t word);
+static void resize(_Anvil_xint *x, int new_size);
 
- int _Anvil_xint_mempool_init(_Anvil_xint_mempool *ppool, int nitems, int size)
-{
-    int mempool_size = (nitems + 1) * size;
-    ppool->pmem = (uint32_t *)malloc(mempool_size * sizeof(uint32_t));
-    ppool->p = ppool->pmem;
-    ppool->mempool_size = mempool_size;
-    return 0;
-}
-
-void _Anvil_xint_mempool_free(_Anvil_xint_mempool *ppool)
-{
-    free(ppool->pmem);
-}
-
-void _Anvil_xint_init(_Anvil_xint_mempool *ppool, _Anvil_xint *x, int size)
+void _Anvil_xint_init(_Anvil_xint *x, int size)
 {
     // Make sure that there's enough space left
     x->capacity = size;
     x->size = 0;
-    x->ppool = ppool;
-    x->data = ppool->p;
-    ppool->p += x->capacity;
-    if (ppool->p > ppool->pmem + ppool->mempool_size)
+    x->data = malloc(sizeof(uint32_t) * x->capacity); //ppool->p;
+    if (x->data == NULL)
     {
-        printf("Too big %p %p %x\n", ppool->p, ppool->pmem, ppool->mempool_size);
+    	printf("OOM\n");
     }
 }
 
 void _Anvil_xint_delete(_Anvil_xint *x)
 {
-    x->ppool->p -= x->capacity;
+    free(x->data);
 }
 
 int biggest;
 
-void _Anvil_xint_resize(_Anvil_xint *x, int new_size)
+static void resize(_Anvil_xint *x, int new_size)
 {
     if (new_size > biggest)
     {
@@ -104,7 +89,7 @@ void _Anvil_xint_assign_64(_Anvil_xint *x, uint64_t val)
         x->size = 0;
         return;
     }
-    _Anvil_xint_resize(x, val & 0xffffffff00000000U ? 2 : 1);
+    resize(x, val & 0xffffffff00000000U ? 2 : 1);
     x->data[0] = val & 0xffffffff;
     x->data[1] = val >> 32;
 }
@@ -112,7 +97,7 @@ void _Anvil_xint_assign_64(_Anvil_xint *x, uint64_t val)
 void _Anvil_xint_assign(_Anvil_xint *x, _Anvil_xint *y)
 {
     // Check that x is big enough
-    _Anvil_xint_resize(x, y->size);
+    resize(x, y->size);
     memcpy(x->data, y->data, y->size * sizeof(uint32_t));
 }
 
@@ -147,7 +132,7 @@ uint32_t _Anvil_xint_add(_Anvil_xint *x, _Anvil_xint *y)
         //printf("ADD DIFF %d %d\n", x->size, y->size);
         //_Anvil_xint_print(x);
         //_Anvil_xint_print(y);
-        _Anvil_xint_resize(x, y->size);
+        resize(x, y->size);
     }
     uint32_t k = 0;
     for (int j=0; j<y->size; ++j)
@@ -165,7 +150,7 @@ uint32_t _Anvil_xint_add(_Anvil_xint *x, _Anvil_xint *y)
     if (k)
     {
         // We need to extend x
-        _Anvil_xint_resize(x, x->size + 1);
+        resize(x, x->size + 1);
         x->data[x->size - 1] = k;
         k = 0;
     }
@@ -239,7 +224,7 @@ uint32_t _Anvil_xint_mul(_Anvil_xint *w, _Anvil_xint *u, const _Anvil_xint *v)
 {
     // Based on Knuth's algorithm M. Knuth numbers the elements from
     // the big end so this looks slightly different, but it's the same
-    _Anvil_xint_resize(w, u->size + v->size);
+    resize(w, u->size + v->size);
     for (int j=0; j<w->size; ++j)
     {
         w->data[j] = 0;
@@ -328,21 +313,21 @@ const uint32_t five_e1024[] =
 const _Anvil_xint big_pow_5[] =
 {
     // 8
-    { 1, 1, (uint32_t *)five_e8, NULL },
+    { 1, 1, (uint32_t *)five_e8 },
     // 16
-    { 2, 2, (uint32_t *)five_e16, NULL },
+    { 2, 2, (uint32_t *)five_e16 },
     // 32
-    { 3, 3, (uint32_t *)five_e32, NULL },
+    { 3, 3, (uint32_t *)five_e32 },
     // 64
-    { 5, 5, (uint32_t *)five_e64, NULL },
+    { 5, 5, (uint32_t *)five_e64 },
     // 128
-    { 10, 10, (uint32_t *)five_e128, NULL },
+    { 10, 10, (uint32_t *)five_e128 },
     // 256
-    { 19, 19, (uint32_t *)five_e256, NULL },
+    { 19, 19, (uint32_t *)five_e256 },
     // 512
-    { 38, 38, (uint32_t *)five_e512, NULL },
+    { 38, 38, (uint32_t *)five_e512 },
     // 1024
-    { 75, 75, (uint32_t *)five_e1024, NULL },
+    { 75, 75, (uint32_t *)five_e1024 },
 };
 
 int smallest_div = 0;
@@ -367,7 +352,7 @@ uint32_t _Anvil_xint_mul_5exp(_Anvil_xint *x, int e)
     if (e)
     {
         _Anvil_xint tmp;
-        _Anvil_xint_init(x->ppool, &tmp, x->capacity);
+        _Anvil_xint_init(&tmp, x->capacity);
         _Anvil_xint_assign(&tmp, x);
         while (e)
         {
@@ -449,11 +434,11 @@ uint32_t _Anvil_xint_div_small(_Anvil_xint *u, _Anvil_xint *v)
 
     if (u->size < v->size)
     {
-        _Anvil_xint_resize(u, v->size);
+        resize(u, v->size);
     }
     else if (u->size > v->size)
     {
-        _Anvil_xint_resize(v, u->size);
+        resize(v, u->size);
     }
 
     if (quot)
@@ -523,8 +508,8 @@ uint32_t _Anvil_xint_div(_Anvil_xint *q, _Anvil_xint *r, _Anvil_xint *u, _Anvil_
     int m = r->size - n + 1;
 
     _Anvil_xint_assign_64(q, 0);
-    _Anvil_xint_resize(q, m + n);
-    _Anvil_xint_resize(r, m + n + 1);
+    resize(q, m + n);
+    resize(r, m + n + 1);
 
     // D2. [Initialise j.]
     for (int j=m; j>=0; --j)
@@ -592,7 +577,7 @@ uint32_t _Anvil_xint_div_int(_Anvil_xint *quot, _Anvil_xint *x, uint32_t v)
 {
     // This is from Knuth's recommended exercise 16 with the indices reversed
     uint32_t r = 0;
-    _Anvil_xint_resize(quot, x->size);
+    resize(quot, x->size);
     for (int j=x->size-1; j>=0; --j)
     {
         uint64_t tmp = ((uint64_t)r << 32) + x->data[j];
@@ -627,7 +612,7 @@ uint32_t _Anvil_xint_lshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
 
     if (shift_bits == 0)
     {
-        _Anvil_xint_resize(y, x->size + shift_words);
+        resize(y, x->size + shift_words);
         for (int j=y->size-1; j>=shift_words; --j)
         {
             Y[j] = X[j - shift_words];
@@ -636,7 +621,7 @@ uint32_t _Anvil_xint_lshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
     else
     {
         // Add 1 to the size to allow the bits to flow in
-        _Anvil_xint_resize(y, x->size + shift_words + 1);
+        resize(y, x->size + shift_words + 1);
         Y[y->size - 1] = X[y->size - 1 - shift_words - 1] >> (32 - shift_bits);
         for (int j=y->size-2; j>=shift_words+1; --j)
         {
@@ -676,11 +661,11 @@ uint32_t _Anvil_xint_rshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
     }
     
     // We need y->size to be at least x->size - shift_words in size
-    // Note that if x and y are the same xint, _Anvil_xint_resize
+    // Note that if x and y are the same xint, resize
     // won't be called and x->size won't change
     if (y->size < x->size - shift_words)
     {
-        _Anvil_xint_resize(y, x->size - shift_words);
+        resize(y, x->size - shift_words);
     }
     if (shift_bits == 0)
     {
@@ -697,7 +682,7 @@ uint32_t _Anvil_xint_rshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
         }
         Y[x->size - shift_words - 1] = X[x->size - 1] >> shift_bits;
     }
-    _Anvil_xint_resize(y, x->size - shift_words);
+    resize(y, x->size - shift_words);
     trim_zeroes(y);
 
     return 0;

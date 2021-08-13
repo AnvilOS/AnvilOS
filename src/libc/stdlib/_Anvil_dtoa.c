@@ -1,19 +1,46 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "_Anvil_double.h"
 #include "_Anvil_xint.h"
 
-char ret_str[1000];
+//char ret_str[1000];
 
 int cc0, cc1, cc2, cc3, cc4, cc5, cc6, cc7;
 
 static const int xint_size = 26;
 
-char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place, int *pk)
+//char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place, int *pk);
+
+char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign, char **rve)
 {
-    _Anvil_xint_mempool mempool;
+    ++cc0;
+
+    char *ret_str;
+    int e = 0;
+    uint64_t f = 0;
+    int32_t p = 0;
+    //int cutoff_mode = mode;
+    int cutoff_place = -ndigits;
+    
+    //memset(ret_str, 0, sizeof(ret_str));
+
+    //
+    // Our double is f * 2^(e-p)
+    //
+    split_double(dd, sign, &f, &e);
+    p = 52;
+
+    if (f == 0)
+    {
+    	ret_str = malloc(2);
+        strcpy(ret_str, "0");
+        *decpt = 1;
+        return ret_str;
+    }
+
     _Anvil_xint R;
     _Anvil_xint S;
     
@@ -23,8 +50,6 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
     int R5e=0, S5e=0;
     int R2e=0, S2e=0;
 
-    char *pret_str = ret_str;
-    
     // NOTE: Instead of actually modifying any of the Xints we record what
     // needs to be done and calculate and optimise it all later
     // Don't worry about recording values for M+ and M- since they follow
@@ -62,13 +87,12 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
         f1 <<= 1;
         --e1;
     }
-    int log10 = (e1 * 30103 / 100000 + 1);
-    if (log10 < 0)
+    int k = (e1 * 30103 / 100000 + 1);
+    if (k < 0)
     {
-        --log10;
+        --k;
     }
 
-    int k = log10;
     if (k < 0)
     {
         R2e -= k;
@@ -114,13 +138,12 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
     // }
     // calculate ceil(S/10)
 
-    _Anvil_xint_mempool_init(&mempool, 5, xint_size);
-    _Anvil_xint_init(&mempool, &R, xint_size);
+    _Anvil_xint_init(&R, xint_size);
     _Anvil_xint_assign_64(&R, f);
     _Anvil_xint_lshift(&R, &R, R2e);
     _Anvil_xint_mul_5exp(&R, R5e);
 
-    _Anvil_xint_init(&mempool, &S, xint_size);
+    _Anvil_xint_init(&S, xint_size);
     _Anvil_xint_assign_64(&S, 1);
     _Anvil_xint_lshift(&S, &S, S2e);
     _Anvil_xint_mul_5exp(&S, S5e);
@@ -165,6 +188,18 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
             ++S5e;
             ++S2e;
         }
+
+    int saved_k = k;
+    int sz = cutoff_mode == e_relative ? ndigits : ndigits + saved_k;
+//    printf("strlen=%lu %lu\n", strlen(ret_str), sz);
+    if (sz < 1)
+    {
+        sz = 1;
+    }
+    ++sz;
+    ret_str = malloc(sz);
+    memset(ret_str, 0, sz);
+    char *pret_str = ret_str;
 
         switch (cutoff_mode)
         {
@@ -291,42 +326,27 @@ char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place
     }
 
     *pret_str = 0;
-    *pk = k;
+    *decpt = k;
 
     _Anvil_xint_delete(&R);
     _Anvil_xint_delete(&S);
-    _Anvil_xint_mempool_free(&mempool);
+    //_Anvil_xint_mempool_free(&mempool);
 
-    return ret_str;
-}
+    *decpt += strlen(ret_str);
 
-char *_Anvil_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve)
-{
-    ++cc0;
-
-    int e = 0;
-    uint64_t f = 0;
-    int32_t p = 0;
-    int cutoff_mode = mode;
-    int cutoff_place = ndigits;
-    
-    memset(ret_str, 0, sizeof(ret_str));
-    
-    //
-    // Our double is f * 2^(e-p)
-    //
-    split_double(dd, sign, &f, &e);
-    p = 52;
-
-    if (f == 0)
+//    int sz = cutoff_mode == e_relative ? ndigits : ndigits + saved_k;
+////    printf("strlen=%lu %lu\n", strlen(ret_str), sz);
+//    if (sz < 1)
+//{
+//        sz = 1;
+//    }
+//    ++sz;
+    if (strlen(ret_str) + 1 > sz)
     {
-        strcpy(ret_str, "0");
-        *decpt = 1;
-        return ret_str;
+        //printf("ooops");
+        printf("strlen=%lu %d %d %d %s", strlen(ret_str), sz, cutoff_place, saved_k, ret_str);
+        printf("\n");
     }
 
-    char *ret = _Anvil_dragon4(e, f, p, cutoff_mode, -cutoff_place, decpt);
-    *decpt += strlen(ret);
-    
-    return ret;
+    return ret_str;
 }
