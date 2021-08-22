@@ -9,7 +9,7 @@
 #include "_Anvil_double.h"
 #include "_Anvil_xint.h"
 
-static const int xint_size = 88;
+static const int xint_size = 81;
 
 static const int n = 53;
 static const int p = 64;
@@ -34,6 +34,7 @@ double prev_float(double z)
     {
         // Sub-normal
         --sig;
+        // TODO: surely this should not be allowed to go below 0
     }
     else if (exp == 0x7ff)
     {
@@ -67,6 +68,7 @@ double next_float(double z)
     {
         // Sub-normal
         ++sig;
+        // TODO: surely if this is all f's we should roll out of being subnormal
     }
     else if (exp == 0x7ff)
     {
@@ -98,11 +100,11 @@ double algoritm_r(_Anvil_xint *f, int e, double z0)
     _Anvil_xint D_abs;
     _Anvil_xint D2;
     _Anvil_xint M;
-    _Anvil_xint_init(&x, xint_size);
-    _Anvil_xint_init(&y, xint_size);
-    _Anvil_xint_init(&D_abs, xint_size);
-    _Anvil_xint_init(&D2, xint_size);
-    _Anvil_xint_init(&M, xint_size);
+    _Anvil_xint_init(&x, f->size);
+    _Anvil_xint_init(&y, f->size);
+    _Anvil_xint_init(&D_abs, f->size);
+    _Anvil_xint_init(&D2, f->size);
+    _Anvil_xint_init(&M, 2);
 
     int loop = 0;
 
@@ -160,16 +162,22 @@ double algoritm_r(_Anvil_xint *f, int e, double z0)
         {
             _Anvil_xint_sub(&D_abs, &y, &x);
         }
+        
+// x IS NOT USED BELOW HERE
 
-        //printf("D2 abs %lx %lx\n", D_abs.data[0], D_abs.data[1]);
+//        printf("D2 abs %lx %lx %lx %lx\n", D_abs.data[0], D_abs.data[1], D_abs.data[2], D_abs.data[3]);
 
         // D2 = 2 * m * abs(d)
         _Anvil_xint_assign_64(&M, m);
 
         _Anvil_xint_mul(&D2, &M, &D_abs);
+        
+// D_abs IS NOT USED BELOW HERE
+        
         _Anvil_xint_mul_int(&D2, 2);
 
-        // Compare D2 with y
+        //printf("x:%d y:%d m:%d D2:%d\n", x.size, y.size, M.size, D2.size);
+       // Compare D2 with y
         int cmp_d2_y = _Anvil_xint_cmp(&D2, &y);
 
         if (cmp_d2_y < 0)
@@ -178,6 +186,9 @@ double algoritm_r(_Anvil_xint *f, int e, double z0)
 
             _Anvil_xint_mul_int(&D2, 2);
             int cmp_2d2_y = _Anvil_xint_cmp(&D2, &y);
+            
+// y IS NOT USED BELOW HERE
+            
             // D2 < y
             if ((m == two_to_n_minus_1) && (D_sign < 0) && (cmp_2d2_y > 0))
             {
@@ -304,12 +315,12 @@ double _Anvil_strtod(const char *restrict nptr, char **restrict endptr)
 
     // The base can be 10 or 16
     base = 10;
-    if (*nptr == '0')
+    if (*str == '0')
     {
-        if (*(nptr+1) == 'x' || *(nptr+1) == 'X')
+        if (*(str+1) == 'x' || *(str+1) == 'X')
         {
             base = 16;
-            nptr += 2;;
+            str += 2;;
         }
         // Todo: What if the next char isn't a hex digit
     }
@@ -327,13 +338,13 @@ double _Anvil_strtod(const char *restrict nptr, char **restrict endptr)
         {
             digit = *str - '0';
         }
-        else if (base == 16 && *nptr <= 'Z' && *nptr >= 'A')
+        else if (base == 16 && *str <= 'Z' && *str >= 'A')
         {
-            digit = *nptr - 'A' + 10;
+            digit = *str - 'A' + 10;
         }
-        else if (base == 16 && *nptr <= 'z' && *nptr >= 'a')
+        else if (base == 16 && *str <= 'z' && *str >= 'a')
         {
-            digit = *nptr - 'a' + 10;
+            digit = *str - 'a' + 10;
         }
         else if (*str == '.')
         {
@@ -443,7 +454,7 @@ double _Anvil_strtod(const char *restrict nptr, char **restrict endptr)
             }
 
             int new_exponent = exponent * 10 + digit;
-            if (new_exponent < exponent)
+            if (exponent != ((new_exponent - digit) / 10))
             {
                 // We overflowed - record the error but keep eating digits
                 mantissa_full = 1;

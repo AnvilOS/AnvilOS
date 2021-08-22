@@ -22,10 +22,7 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
     int e = 0;
     uint64_t f = 0;
     int32_t p = 0;
-    //int cutoff_mode = mode;
     int cutoff_place = -ndigits;
-    
-    //memset(ret_str, 0, sizeof(ret_str));
 
     //
     // Our double is f * 2^(e-p)
@@ -81,13 +78,13 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
     // We will keep both loops but expect them to be executed rarely
     //
     uint64_t f1 = f;
-    int e1 = e;
+    //int e1 = e;
     while ((f1 & 0x10000000000000) == 0)
     {
         f1 <<= 1;
-        --e1;
+        --e;
     }
-    int k = (e1 * 30103 / 100000 + 1);
+    int k = (e * 30103 / 100000 + 1);
     if (k < 0)
     {
         --k;
@@ -153,67 +150,49 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
     {
         // k = k-1
         // R = R * B
-        // M- = M- * B
-        // M+ = M+ * B
         ++cc2;
         --k;
         _Anvil_xint_mul_int(&R, 10);
-        ++R5e; ++R2e;
+//        ++R5e; ++R2e;
     }
 
     _Anvil_xint_mul_int(&S, 10);
-    ++S5e; ++S2e;
+    //++S5e; ++S2e;
 
-//    //printf("Loop1=%d\n", loop_cnt);
-//
-//    // In the next part of the algorithm we need to compare
-//    // 2*R + M+ with 2*S
-//
-//    // Let TEMP = 2 * R + M+
-//    _Anvil_xint_lshift(&R, &R, 1);
-//
-//    ///////////////////////////////////////
-//    // Temporarily set S to S * 2
-//    _Anvil_xint_lshift(&S, &S, 1);
-//    ///////////////////////////////////////
-
-        // while TEMP >= 2 * S
+    // while R >= S
     while (_Anvil_xint_cmp(&R, &S) >= 0)
-        {
-            // S = S * B
-            // k = k + 1
-            ++cc3;
-            _Anvil_xint_mul_int(&S, 10);
-            ++k;
-            ++S5e;
-            ++S2e;
-        }
-
-    int saved_k = k;
-    int sz = cutoff_mode == e_relative ? ndigits : ndigits + saved_k;
+    {
+        // S = S * B
+        // k = k + 1
+        ++cc3;
+        _Anvil_xint_mul_int(&S, 10);
+        ++k;
+//		++S5e;
+//		++S2e;
+    }
+    int sz = cutoff_mode == e_relative ? ndigits : ndigits + k;
 //    printf("strlen=%lu %lu\n", strlen(ret_str), sz);
     if (sz < 1)
     {
         sz = 1;
     }
     ++sz;
-    ret_str = malloc(sz);
+    ret_str = malloc((size_t)sz);
     memset(ret_str, 0, sz);
     char *pret_str = ret_str;
-
-        switch (cutoff_mode)
-        {
-            case e_relative:
+    
+    switch (cutoff_mode)
+    {
+        case e_relative:
             cutoff_place += k;
             break;
-            case e_absolute:
+
+        case e_absolute:
             if (k <= cutoff_place)
             {
                 _Anvil_xint_lshift(&R, &R, 1);
-                ++R2e;
+//				++R2e;
                 no_print = 1;
-//                    _Anvil_xint_print("R: ", &R);
-//                    _Anvil_xint_print("S: ", &S);
                 int cmp = _Anvil_xint_cmp(&R, &S);
                 if (k == cutoff_place && cmp > 0)
                 {
@@ -225,16 +204,16 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
                     // Output a 0 but don't print it
                 }
                 k = cutoff_place;
-                }
-                break;
             }
+            break;
+    }
 
 //    ++R2e;
 //    ++S2e;
 #if 0
     // Check all our variables are correct
     _Anvil_xint TEMP;
-    _Anvil_xint_init(&mempool, &TEMP, xint_size);
+    _Anvil_xint_init(&TEMP, xint_size);
     _Anvil_xint_assign_64(&TEMP, f);
     _Anvil_xint_lshift(&TEMP, &TEMP, R2e);
     _Anvil_xint_mul_5exp(&TEMP, R5e);
@@ -285,8 +264,8 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
             {
                 break;
             }
-                *pret_str++ = U + 0x30;
-            }
+            *pret_str++ = U + 0x30;
+        }
 
         // The loop is done so output the final digit
         // Scale R up by 2
@@ -326,27 +305,16 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
     }
 
     *pret_str = 0;
-    *decpt = k;
+    *decpt = k + (int)strlen(ret_str);
 
     _Anvil_xint_delete(&R);
     _Anvil_xint_delete(&S);
-    //_Anvil_xint_mempool_free(&mempool);
 
-    *decpt += strlen(ret_str);
-
-//    int sz = cutoff_mode == e_relative ? ndigits : ndigits + saved_k;
-////    printf("strlen=%lu %lu\n", strlen(ret_str), sz);
-//    if (sz < 1)
-//{
-//        sz = 1;
-//    }
-//    ++sz;
     if (strlen(ret_str) + 1 > sz)
     {
-        //printf("ooops");
-        printf("strlen=%lu %d %d %d %s", strlen(ret_str), sz, cutoff_place, saved_k, ret_str);
+        printf("strlen=%lu %d %d %s", strlen(ret_str), sz, cutoff_place, ret_str);
         printf("\n");
     }
-
+    
     return ret_str;
 }
