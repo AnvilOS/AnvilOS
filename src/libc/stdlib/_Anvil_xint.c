@@ -19,6 +19,7 @@ void _Anvil_xint_init(_Anvil_xint *x, int size)
     // Make sure that there's enough space left
     x->capacity = size;
     x->size = 0;
+//    printf("MALLOC %lu\n", sizeof(uint32_t) * x->capacity);
     x->data = malloc(sizeof(uint32_t) * x->capacity); //ppool->p;
     if (x->data == NULL)
     {
@@ -107,7 +108,8 @@ static void resize(_Anvil_xint *x, int new_size)
     if (new_size < x->size)
     {
         x->size = new_size;
-        trim_zeroes(x);
+        // XXX: fix this
+        //trim_zeroes(x);
         return;
     }
     if (new_size == x->capacity)
@@ -118,6 +120,7 @@ static void resize(_Anvil_xint *x, int new_size)
     if (new_size > x->capacity)
     {
         //printf("OVER CAPACITY %d %d!!!\n", new_size, x->capacity);
+        //printf("REALLOC %d to %lu\n", sizeof(uint32_t) * x->capacity, sizeof(uint32_t) * new_size);
         x->data = realloc(x->data, sizeof(uint32_t) * new_size);
         x->capacity = new_size;
         //while (1);
@@ -689,8 +692,8 @@ uint32_t _Anvil_xint_lshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
     {
         return 0;
     }
-    uint32_t *X = x->data;
-    uint32_t *Y = y->data;
+//    uint32_t *X = x->data;
+//    uint32_t *Y = y->data;
 
     if (numbits == 0)
     {
@@ -710,23 +713,23 @@ uint32_t _Anvil_xint_lshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
         resize(y, x->size + shift_words);
         for (int j=y->size-1; j>=shift_words; --j)
         {
-            Y[j] = X[j - shift_words];
+            y->data[j] = x->data[j - shift_words];
         }
     }
     else
     {
         // Add 1 to the size to allow the bits to flow in
         resize(y, x->size + shift_words + 1);
-        Y[y->size - 1] = X[y->size - 1 - shift_words - 1] >> (32 - shift_bits);
+        y->data[y->size - 1] = x->data[y->size - 1 - shift_words - 1] >> (32 - shift_bits);
         for (int j=y->size-2; j>=shift_words+1; --j)
         {
-            Y[j] = (X[j - shift_words] << shift_bits) | (X[j - shift_words - 1] >> (32 - shift_bits));
+            y->data[j] = (x->data[j - shift_words] << shift_bits) | (x->data[j - shift_words - 1] >> (32 - shift_bits));
         }
-        Y[shift_words] = X[0] << shift_bits;
+        y->data[shift_words] = x->data[0] << shift_bits;
     }
     for (int j=shift_words-1; j>=0; --j)
     {
-        Y[j] = 0;
+        y->data[j] = 0;
     }
     trim_zeroes(y);
 
@@ -740,8 +743,8 @@ uint32_t _Anvil_xint_rshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
         return 0;
     }
 
-    uint32_t *X = x->data;
-    uint32_t *Y = y->data;
+//    uint32_t *X = x->data;
+//    uint32_t *Y = y->data;
 
     // Calculate the shift
     int shift_words = numbits / 32;
@@ -766,16 +769,16 @@ uint32_t _Anvil_xint_rshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
     {
         for (int j=0; j<x->size - shift_words; ++j)
         {
-            Y[j] = X[j + shift_words];
+            y->data[j] = x->data[j + shift_words];
         }
     }
     else
     {
         for (int j=0; j<x->size - shift_words - 1; ++j)
         {
-            Y[j] = (X[j + shift_words] >> shift_bits) | (X[j + shift_words + 1] << (32 - shift_bits));
+            y->data[j] = (x->data[j + shift_words] >> shift_bits) | (x->data[j + shift_words + 1] << (32 - shift_bits));
         }
-        Y[x->size - shift_words - 1] = X[x->size - 1] >> shift_bits;
+        y->data[x->size - shift_words - 1] = x->data[x->size - 1] >> shift_bits;
     }
     resize(y, x->size - shift_words);
     trim_zeroes(y);
