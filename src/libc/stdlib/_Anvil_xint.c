@@ -7,24 +7,26 @@
 
 //#define MIN(a, b) ((a)<(b)?(a):(b))
 //#define MAX(a, b) ((a)>(b)?(a):(b))
-#define B 0x100000000ULL
+//#define B 0x100000000ULL
 
 static void trim_zeroes(_Anvil_xint *x);
 static int get_highest_word(_Anvil_xint *x);
 static int get_highest_bit(uint32_t word);
 static void resize(_Anvil_xint *x, int new_size);
 
-void _Anvil_xint_init(_Anvil_xint *x, int size)
+int malloc_cnt, realloc_cnt;
+
+void _Anvil_xint_init(_Anvil_xint *x)
 {
     // Make sure that there's enough space left
-    x->capacity = size;
+    x->capacity = 0;
     x->size = 0;
-//    printf("MALLOC %lu\n", sizeof(uint32_t) * x->capacity);
-    x->data = malloc(sizeof(uint32_t) * x->capacity); //ppool->p;
-    if (x->data == NULL)
-    {
-    	printf("OOM\n");
-    }
+    x->data = NULL;//malloc(sizeof(uint32_t) * x->capacity); //ppool->p;
+    //++malloc_cnt;
+//    if (x->data == NULL)
+//    {
+//    	printf("OOM\n");
+//    }
 }
 
 void _Anvil_xint_delete(_Anvil_xint *x)
@@ -122,6 +124,7 @@ static void resize(_Anvil_xint *x, int new_size)
         //printf("OVER CAPACITY %d %d!!!\n", new_size, x->capacity);
         //printf("REALLOC %d to %lu\n", sizeof(uint32_t) * x->capacity, sizeof(uint32_t) * new_size);
         x->data = realloc(x->data, sizeof(uint32_t) * new_size);
+        ++realloc_cnt;
         x->capacity = new_size;
         //while (1);
     }
@@ -443,7 +446,7 @@ uint32_t _Anvil_xint_mul_5exp(_Anvil_xint *x, int e)
     if (e)
     {
         _Anvil_xint tmp;
-        _Anvil_xint_init(&tmp, x->capacity);
+        _Anvil_xint_init(&tmp);
         _Anvil_xint_assign(&tmp, x);
         while (e)
         {

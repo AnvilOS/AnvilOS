@@ -100,11 +100,11 @@ double algoritm_r(_Anvil_xint *f, int e, double z0)
     _Anvil_xint D_abs;
     _Anvil_xint D2;
     _Anvil_xint M;
-    _Anvil_xint_init(&x, f->size);
-    _Anvil_xint_init(&y, f->size);
-    _Anvil_xint_init(&D_abs, f->size);
-    _Anvil_xint_init(&D2, f->size);
-    _Anvil_xint_init(&M, 2);
+    _Anvil_xint_init(&x);
+    _Anvil_xint_init(&y);
+    _Anvil_xint_init(&D_abs);
+    _Anvil_xint_init(&D2);
+    _Anvil_xint_init(&M);
 
     int loop = 0;
 
@@ -368,7 +368,7 @@ double _Anvil_strtod(const char *restrict nptr, char **restrict endptr)
                 {
                     // We overflowed - record the error but keep eating digits
                     mantissa_full = 1;
-                    _Anvil_xint_init(&mant_big, xint_size);
+                    _Anvil_xint_init(&mant_big);
                     _Anvil_xint_assign_64(&mant_big, mantissa);
                     _Anvil_xint_mul_int(&mant_big, base);
                     _Anvil_xint_add_int(&mant_big, digit);
@@ -396,7 +396,7 @@ double _Anvil_strtod(const char *restrict nptr, char **restrict endptr)
                 {
                     // We overflowed - record the error but keep eating digits
                     mantissa_full = 1;
-                    _Anvil_xint_init(&mant_big, xint_size);
+                    _Anvil_xint_init(&mant_big);
                     _Anvil_xint_assign_64(&mant_big, mantissa);
                     _Anvil_xint_mul_int(&mant_big, base);
                     _Anvil_xint_add_int(&mant_big, digit);
@@ -516,7 +516,7 @@ double _Anvil_strtod(const char *restrict nptr, char **restrict endptr)
         }
 
         //dump_double(estimate);
-        _Anvil_xint_init(&mant_big, xint_size);
+        _Anvil_xint_init(&mant_big);
         _Anvil_xint_assign_64(&mant_big, mantissa);
         exponent += mantissa_exp;
     }

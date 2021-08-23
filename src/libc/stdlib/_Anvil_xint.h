@@ -19,7 +19,7 @@ extern "C"
 {
 #endif
 
-void _Anvil_xint_init(_Anvil_xint *x, int size);
+void _Anvil_xint_init(_Anvil_xint *x);
 void _Anvil_xint_delete(_Anvil_xint *x);
 int _Anvil_xint_load_str(_Anvil_xint *x, const char *str);
 int _Anvil_xint_is_zero(_Anvil_xint *x);

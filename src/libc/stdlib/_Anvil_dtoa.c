@@ -135,12 +135,12 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
     // }
     // calculate ceil(S/10)
 
-    _Anvil_xint_init(&R, xint_size);
+    _Anvil_xint_init(&R);
     _Anvil_xint_assign_64(&R, f);
     _Anvil_xint_lshift(&R, &R, R2e);
     _Anvil_xint_mul_5exp(&R, R5e);
 
-    _Anvil_xint_init(&S, xint_size);
+    _Anvil_xint_init(&S);
     _Anvil_xint_assign_64(&S, 1);
     _Anvil_xint_lshift(&S, &S, S2e);
     _Anvil_xint_mul_5exp(&S, S5e);
