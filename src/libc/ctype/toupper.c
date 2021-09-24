@@ -3,6 +3,6 @@
 
 int toupper(int c)
 {
-    _ANVIL_CTYPE_RANGE_FIX(c);
-    return _C_toupper[c] ? _C_toupper[c] : c-1;
+    int cc = _ANVIL_CTYPE_RANGE_FIX(c);
+    return _C_toupper[cc] ? _C_toupper[cc] : c;
 }

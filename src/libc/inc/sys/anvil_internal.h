@@ -81,8 +81,7 @@
  *  -1 (EOF) ==> 0
  *  0..255   ==> 1..256
  */
-#define _ANVIL_CTYPE_RANGE_FIX(__c) do { c = (c == -1 ? 0 : (unsigned char)c + 1); } while (0);
-//#define _ANVIL_CTYPE_RANGE_FIX(__c) do { ++c; } while (0);
+#define _ANVIL_CTYPE_RANGE_FIX(__c) (__c == -1 ? 0 : (unsigned char)__c + 1)
 
 #define _Anvil_va_list  __builtin_va_list
 #define _Anvil_int64_t  __INT64_TYPE__

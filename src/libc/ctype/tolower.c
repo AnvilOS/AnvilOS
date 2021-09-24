@@ -3,6 +3,6 @@
 
 int tolower(int c)
 {
-    _ANVIL_CTYPE_RANGE_FIX(c);
-    return _C_tolower[c] ? _C_tolower[c] : c-1;
+    int cc =_ANVIL_CTYPE_RANGE_FIX(c);
+    return _C_tolower[cc] ? _C_tolower[cc] : c;
 }

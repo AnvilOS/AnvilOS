@@ -6,7 +6,7 @@
 
 static const char punctuation[] = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 static const char spaces[] = " \f\n\r\t\v";
-static const int FIRST_CHAR = -1;
+static const int FIRST_CHAR = -128;
 static const int LAST_CHAR = 255;
 
 static int is_in(const char *str, int c)
@@ -27,6 +27,21 @@ static int is_in(const char *str, int c)
 }
 
 TEST_GROUP(ctype)
+
+TEST(ctype, mapper)
+{
+	/*  -127..-2 ==> 129..255
+	 *  -1 (EOF) ==> 0
+	 *  0..255   ==> 1..256
+	 */
+	ASSERT_EQ(130, _ANVIL_CTYPE_RANGE_FIX(-127));
+	ASSERT_EQ(255, _ANVIL_CTYPE_RANGE_FIX(-2));
+	ASSERT_EQ(0, _ANVIL_CTYPE_RANGE_FIX(-1));
+	ASSERT_EQ(1, _ANVIL_CTYPE_RANGE_FIX(0));
+	ASSERT_EQ(256, _ANVIL_CTYPE_RANGE_FIX(255));
+
+    END_TEST(ctype);
+}
 
 TEST(ctype, isalnum)
 {
@@ -294,6 +309,7 @@ TEST(ctype, toupper)
 
 int ctype_test()
 {
+    CALL_TEST(ctype, mapper);
     CALL_TEST(ctype, isalnum);
     CALL_TEST(ctype, isalpha);
     CALL_TEST(ctype, isblank);
