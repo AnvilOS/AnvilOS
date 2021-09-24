@@ -3,91 +3,27 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-
-//#define MIN(a, b) ((a)<(b)?(a):(b))
-//#define MAX(a, b) ((a)>(b)?(a):(b))
-//#define B 0x100000000ULL
+//#include <stdio.h>
 
 static void trim_zeroes(_Anvil_xint *x);
 static int get_highest_word(_Anvil_xint *x);
 static int get_highest_bit(uint32_t word);
 static void resize(_Anvil_xint *x, int new_size);
+uint32_t div_int(_Anvil_xint *quot, _Anvil_xint *x, uint32_t v);
+uint32_t div_5exp(_Anvil_xint *x, int e);
 
 int malloc_cnt, realloc_cnt;
 
 void _Anvil_xint_init(_Anvil_xint *x)
 {
-    // Make sure that there's enough space left
     x->capacity = 0;
     x->size = 0;
-    x->data = NULL;//malloc(sizeof(uint32_t) * x->capacity); //ppool->p;
-    //++malloc_cnt;
-//    if (x->data == NULL)
-//    {
-//    	printf("OOM\n");
-//    }
+    x->data = NULL;
 }
 
 void _Anvil_xint_delete(_Anvil_xint *x)
 {
     free(x->data);
-}
-
-int _Anvil_xint_load_str(_Anvil_xint *x, const char *str)
-{
-    int sz = strlen(str);
-    const char *p = str + sz - 1;
-    int ndx;
-    if (sz == 0)
-    {
-        x->size = 0;
-        return 0;
-    }
-    sz = (sz - 1) / 8 + 1;
-    resize(x, sz);
-    ndx = 0;
-    uint32_t val = 0;
-    uint32_t mult = 1;
-    while (1)
-    {
-        int digit;
-        if (*p <= '9' && *p >= '0')
-        {
-            digit = *p - '0';
-        }
-        else if (*p <= 'Z' && *p >= 'A')
-        {
-            digit = *p - 'A' + 10;
-        }
-        else if (*p <= 'z' && *p >= 'a')
-        {
-            digit = *p - 'a' + 10;
-        }
-        else
-        {
-            digit = -1;
-        }
-        if (digit != -1)
-        {
-            val += digit * mult;
-            mult <<= 4;
-            if (mult == 0)
-            {
-                x->data[ndx] = val;
-                mult = 1;
-                val = 0;
-                ++ndx;
-                if (p <= str)
-                {
-                    break;
-                }
-            }
-        }
-        --p;
-    }
-    trim_zeroes(x);
-    return 0;
 }
 
 int biggest;
@@ -148,17 +84,6 @@ int _Anvil_xint_is_zero(_Anvil_xint *x)
     return 1;
 }
 
-int _Anvil_xint_print(const char *label, _Anvil_xint *x)
-{
-    printf("%s: ", label);
-    for (int j=x->size-1; j>=0; --j)
-    {
-        printf("%08x ", x->data[j]);
-    }
-    printf("\n");
-    return 1;
-}
-
 void _Anvil_xint_assign_64(_Anvil_xint *x, uint64_t val)
 {
     if (val == 0)
@@ -194,49 +119,10 @@ uint32_t _Anvil_xint_mul_int(_Anvil_xint *x, unsigned n)
     {
         resize(x, x->size + 1);
         x->data[x->size-1] = k;
-        k = 0;
     }
-//    if (k)
-//    {
-//        printf("MUL OVERFLOW\n");
-//        while (1);
-//    }
     trim_zeroes(x);
     return k;
 }
-
-//uint32_t _Anvil_xint_add(_Anvil_xint *x, _Anvil_xint *y)
-//{
-//    if (x->size < y->size)
-//    {
-//        //printf("ADD DIFF %d %d\n", x->size, y->size);
-//        //_Anvil_xint_print(x);
-//        //_Anvil_xint_print(y);
-//        resize(x, y->size);
-//    }
-//    uint32_t k = 0;
-//    for (int j=0; j<y->size; ++j)
-//    {
-//        uint64_t sum = (uint64_t)x->data[j] + y->data[j] + k;
-//        x->data[j] = sum & 0xffffffff;
-//        k = sum >> 32;
-//    }
-//    for (int j=y->size; j<x->size; ++j)
-//    {
-//        uint64_t sum = (uint64_t)x->data[j] + k;
-//        x->data[j] = sum & 0xffffffff;
-//        k = sum >> 32;
-//    }
-//    if (k)
-//    {
-//        // We need to extend x
-//        resize(x, x->size + 1);
-//        x->data[x->size - 1] = k;
-//        k = 0;
-//    }
-//    //trim_zeroes(x);
-//    return k;
-//}
 
 uint32_t _Anvil_xint_add_int(_Anvil_xint *x, unsigned n)
 {
@@ -251,14 +137,7 @@ uint32_t _Anvil_xint_add_int(_Anvil_xint *x, unsigned n)
     {
         resize(x, x->size + 1);
         x->data[x->size-1] = k;
-        k = 0;
     }
-//    if (k && (x->size < x->capacity))
-//    {
-//        x->data[x->size] = k;
-//        ++x->size;
-//        k = 0;
-//    }
     trim_zeroes(x);
     return k;
 }
@@ -305,7 +184,7 @@ int _Anvil_xint_sub(_Anvil_xint *res, _Anvil_xint *x, _Anvil_xint *y)
     
     if (k)
     {
-        printf("KKKKKKKKKK\n");
+//        printf("KKKKKKKKKK\n");
     }
     //res->size = x->size;
     
@@ -432,7 +311,7 @@ uint32_t _Anvil_xint_mul_5exp(_Anvil_xint *x, int e)
     if (e < 0)
     {
         //printf("Doing DIV\n");
-        return _Anvil_xint_div_5exp(x, -e);
+        return div_5exp(x, -e);
     }
     if (e > biggest_mul)
     {
@@ -475,7 +354,7 @@ uint32_t _Anvil_xint_mul_5exp(_Anvil_xint *x, int e)
     return 0;
 }
 
-uint32_t _Anvil_xint_div_5exp(_Anvil_xint *x, int e)
+uint32_t div_5exp(_Anvil_xint *x, int e)
 {
     if (e > smallest_div)
     {
@@ -485,10 +364,10 @@ uint32_t _Anvil_xint_div_5exp(_Anvil_xint *x, int e)
     const int highest_small_e5 = sizeof(small_pow_5) / sizeof(small_pow_5[0]) - 1;
     while (e > highest_small_e5)
     {
-        _Anvil_xint_div_int(x, x, small_pow_5[highest_small_e5]);
+        div_int(x, x, small_pow_5[highest_small_e5]);
         e -= highest_small_e5;
     }
-    _Anvil_xint_div_int(x, x, small_pow_5[e]);
+    div_int(x, x, small_pow_5[e]);
     return 0;
 }
 
@@ -574,107 +453,7 @@ int _Anvil_xint_highest_bit(_Anvil_xint *x)
     return highest_word * 32 + highest_bit;
 }
 
-//uint32_t _Anvil_xint_div(_Anvil_xint *q, _Anvil_xint *r, _Anvil_xint *u, _Anvil_xint *v)
-//{
-//    // As per Knuth's later revision with little endian indices
-//    // u[0] to u[m+n-1]
-//    // v[0] to v[n-1]
-//    // q[0] to q[m]
-//    // r[0] to r[n-1]
-//
-//    if (v->size == 1)
-//    {
-//        // Use the algorithm from exercise 16
-//        uint32_t a = _Anvil_xint_div_int(q, u, v->data[0]);
-//        _Anvil_xint_assign_64(r, a);
-//        trim_zeroes(q);
-//        trim_zeroes(r);
-//        return 0;
-//    }
-//
-//    // D1. [Normalise.]
-//    // Use Knuth's suggestion of a power of 2 for d. For v1 to be > b/2
-//    // we need v1 to have its top bit set.
-//
-//    // Find the highest bit in the highest word in v that contains data
-//    int highest_word = get_highest_word(v);
-//    int highest_bit = get_highest_bit(v->data[highest_word]);
-//
-//    // Move both u and v to the left so that the top bit of V is set
-//    // Note that we use r for normalised u from now on
-//    _Anvil_xint_lshift(r, u, 31 - highest_bit);
-//    _Anvil_xint_lshift(v, v, 31 - highest_bit);
-//
-//    int n = v->size;
-//    int m = r->size - n + 1;
-//
-//    _Anvil_xint_assign_64(q, 0);
-//    resize(q, m + n);
-//    resize(r, m + n + 1);
-//
-//    // D2. [Initialise j.]
-//    for (int j=m; j>=0; --j)
-//    {
-//        // D3. [Calculate q^]
-//        uint64_t qhat = (r->data[j+n] * B + r->data[j+n-1]) / v->data[n-1];
-//        uint64_t rhat = (r->data[j+n] * B + r->data[j+n-1]) % v->data[n-1];
-//        while (qhat >= B || (qhat * v->data[n-2] > B * rhat + r->data[j+n-2]))
-//        {
-//            --qhat;
-//            rhat += v->data[n-1];
-//            if (rhat >= B)
-//            {
-//                break;
-//            }
-//        }
-//
-//        // D4. [Multiply and subtract.]
-//        // Replace u(j+n to j) by u(j+n to j) - qhat * v(n-1 to 0)
-//        // Since r is u we have r = r - qhat * v
-//        int64_t k = 0;
-//        for (int i=0; i<n; ++i)
-//        {
-//            int64_t prod_diff = r->data[j+i] - qhat * v->data[i] + k;
-//            r->data[i+j] = prod_diff & 0xffffffff;
-//            k = prod_diff >> 32;
-//        }
-//        int64_t prod_diff = r->data[j+n] + k;
-//        r->data[j+n] = prod_diff & 0xffffffff;
-//
-//        // Note that we know qhat < B
-//        q->data[j] = (uint32_t)qhat;
-//
-//        // D5. Test remainder
-//        if (prod_diff < 0)
-//        {
-//            // D6. [Add back.]
-//            // Decrease Qj by one
-//            --q->data[j];
-//            // Add V(n-1 to 0) to U(n+j to j)
-//            int64_t k = 0;
-//            for (int i=0; i<n; i++)
-//            {
-//                uint64_t sum = (uint64_t)r->data[j+i] + v->data[i] + k;
-//                r->data[j+i] = sum & 0xffffffff;
-//                k = sum >> 32;
-//            }
-//            r->data[j+n] = (r->data[j+n] + k) & 0xffffffff;
-//        }
-//        // D7. Loop on j
-//    }
-//
-//    // D8. Un-normalise
-//    _Anvil_xint_rshift(v, v, 31 - highest_bit);
-//    _Anvil_xint_rshift(r, r, 31 - highest_bit);
-//
-//    trim_zeroes(q);
-//    trim_zeroes(r);
-//    trim_zeroes(v);
-//
-//    return 0;
-//}
-
-uint32_t _Anvil_xint_div_int(_Anvil_xint *quot, _Anvil_xint *x, uint32_t v)
+uint32_t div_int(_Anvil_xint *quot, _Anvil_xint *x, uint32_t v)
 {
     // This is from Knuth's recommended exercise 16 with the indices reversed
     uint32_t r = 0;
@@ -695,9 +474,6 @@ uint32_t _Anvil_xint_lshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
     {
         return 0;
     }
-//    uint32_t *X = x->data;
-//    uint32_t *Y = y->data;
-
     if (numbits == 0)
     {
         return 0;
@@ -745,10 +521,6 @@ uint32_t _Anvil_xint_rshift(_Anvil_xint *y, _Anvil_xint *x, int numbits)
     {
         return 0;
     }
-
-//    uint32_t *X = x->data;
-//    uint32_t *Y = y->data;
-
     // Calculate the shift
     int shift_words = numbits / 32;
     int shift_bits = numbits % 32;

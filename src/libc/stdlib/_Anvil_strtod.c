@@ -9,8 +9,6 @@
 #include "_Anvil_double.h"
 #include "_Anvil_xint.h"
 
-static const int xint_size = 81;
-
 static const int n = 53;
 static const int p = 64;
 
@@ -92,6 +90,8 @@ double next_float(double z)
     return bits.dbl;
 }
 
+int loops = 0;
+
 double algoritm_r(_Anvil_xint *f, int e, double z0)
 {
     double z = z0;
@@ -105,8 +105,6 @@ double algoritm_r(_Anvil_xint *f, int e, double z0)
     _Anvil_xint_init(&D_abs);
     _Anvil_xint_init(&D2);
     _Anvil_xint_init(&M);
-
-    int loop = 0;
 
     while (1)
     {
@@ -244,7 +242,7 @@ double algoritm_r(_Anvil_xint *f, int e, double z0)
                 z = next_float(z);
             }
         }
-        ++loop;
+        ++loops;
     }
 
     _Anvil_xint_delete(&x);

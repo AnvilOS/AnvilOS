@@ -10,8 +10,6 @@
 
 int cc0, cc1, cc2, cc3, cc4, cc5, cc6, cc7;
 
-static const int xint_size = 26;
-
 //char *_Anvil_dragon4(int e, uint64_t f, int p, int cutoff_mode, int cutoff_place, int *pk);
 
 char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign, char **rve)
