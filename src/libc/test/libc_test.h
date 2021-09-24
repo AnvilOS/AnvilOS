@@ -2,6 +2,8 @@
 #ifndef LIBC_TEST_H
 #define LIBC_TEST_H
 
+#include "test_harness.h"
+
 int libc_test();
 
 int string_test();
