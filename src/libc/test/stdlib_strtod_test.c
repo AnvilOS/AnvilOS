@@ -208,8 +208,8 @@ int stdlib_strtod_test()
     CALL_TEST(stdlib_strtod, gdtoa_test_data);
 //    CALL_TEST(stdlib_strtod, dtoa_test_mode_0);
 //    CALL_TEST(stdlib_strtod, dtoa_test_mode_1);
-//    CALL_TEST(stdlib_strtod, dtoa_test_mode_2);
-//    CALL_TEST(stdlib_strtod, dtoa_test_mode_3);
+    CALL_TEST(stdlib_strtod, dtoa_test_mode_2);
+    CALL_TEST(stdlib_strtod, dtoa_test_mode_3);
 //    CALL_TEST(stdlib_strtod, dtoa_test_mode_4);
 //    CALL_TEST(stdlib_strtod, dtoa_test_mode_5);
 
