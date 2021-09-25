@@ -30,14 +30,14 @@ void start_func()
 
     SystemInit();
 
-//    sched_init();
-//    thread_init();
+    sched_init();
+    thread_init();
 
     /* Point the msp at the kernel stack */
-//    msp_set(0x20002000);
-//
-//    /* Set the thread mode stack to be the PSP */
-//    control_set(0x00000002);
+    msp_set(0x20002000);
+
+    /* Set the thread mode stack to be the PSP */
+    control_set(0x00000002);
 
     /* Branch to main and it effectively becomes thread 1 */
     __asm__ __volatile__ ("b main");
@@ -98,9 +98,12 @@ void SysTick_Handler1()
         counter = 0;
     }
 
-    currt = sched_get_currt();
-    currt->psp = psp_get();
-    schedule(currt);
-    currt = sched_get_currt();
-    psp_set(currt->psp);
+    if ((counter % 100) == 0)
+    {
+		currt = sched_get_currt();
+		currt->psp = psp_get();
+		schedule(currt);
+		currt = sched_get_currt();
+		psp_set(currt->psp);
+    }
 }

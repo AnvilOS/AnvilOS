@@ -29,8 +29,12 @@ void sched_add(struct thread_obj *t, int head)
     }
 }
 
+extern void *_Anvil_tls_tp;
+
 void schedule(struct thread_obj *currt)
 {
     sched_add(currt, 0);
+    currt->tls_ptr = _Anvil_tls_tp;
     g_currt = (struct thread_obj *)dlist_rem_head(&sched_list);
+    _Anvil_tls_tp = g_currt->tls_ptr;
 }

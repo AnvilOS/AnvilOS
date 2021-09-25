@@ -22,6 +22,7 @@ struct thread_obj
     uint64_t *stk;
     uint32_t psp;
     size_t stk_sz;
+    void *tls_ptr;
 };
 
 void thread_init();

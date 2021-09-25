@@ -14,12 +14,13 @@ void *__aeabi_read_tp()
 {
 	if (!_Anvil_tls_tp)
 	{
-		printf("Allocating %x bytes\n", &__etbss__ - &__stdata__);
-		_Anvil_tls_tp = malloc(&__etbss__ - &__stdata__);
-		printf("Copying %x bytes\n", &__etdata__ - &__stdata__);
-		memcpy(_Anvil_tls_tp, &__stdata__, &__etdata__ - &__stdata__);
-		printf("Zeroing %x bytes\n", &__etbss__ - &__stbss__);
-		memset((char *)_Anvil_tls_tp + (&__etdata__ - &__stdata__), 0, &__etbss__ - &__stbss__);
+		//printf("Allocating %x bytes\n", &__etbss__ - &__stdata__);
+		void *new_p = malloc(&__etbss__ - &__stdata__);
+		//printf("Copying %x bytes\n", &__etdata__ - &__stdata__);
+		memcpy(new_p, &__stdata__, &__etdata__ - &__stdata__);
+		//printf("Zeroing %x bytes\n", &__etbss__ - &__stbss__);
+		memset((char *)new_p + (&__etdata__ - &__stdata__), 0, &__etbss__ - &__stbss__);
+		_Anvil_tls_tp = new_p;
 	}
 	return _Anvil_tls_tp;
 }
