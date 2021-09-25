@@ -17,6 +17,7 @@ void thread_init()
     thread_1.stk_sz = 512;
     thread_1.stk = stk1;
     thread_1.psp = (uint32_t)(thread_1.stk + 64);
+    thread_1.tls_ptr = NULL;
 
     /* Point the psp at the thread 1 stack */
     psp_set((uint32_t)thread_1.psp);
@@ -32,6 +33,7 @@ int kcall_threadcreate(struct thread_obj *currt)
     p_thr->stk = (uint64_t *)malloc(p_thr->stk_sz);
     p_thr->id = 2;
     p_thr->psp = (uint32_t)(p_thr->stk + p_thr->stk_sz - sizeof(struct regpack));
+    p_thr->tls_ptr = NULL;
 
     struct regpack *preg = (struct regpack *)(p_thr->stk + p_thr->stk_sz - sizeof(struct regpack));
     preg->psr = 0x01000000;
