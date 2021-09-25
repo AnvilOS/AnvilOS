@@ -67,10 +67,9 @@ export GCC_ARCH_ARGS="\
  --disable-libmudflap \
  --disable-libquadmath \
  --disable-libssp \
- --disable-tls \
  --disable-nls \
  --disable-shared \
- --disable-threads \
+ --enable-threads=posix \
  --disable-wchar_t \
  --disable-clocale \
  --disable-libstdcxx-pch \
