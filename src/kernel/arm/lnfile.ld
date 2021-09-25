@@ -23,6 +23,23 @@ SECTIONS
         __exidx_end = .;
     } > INTERNAL_ROM
 
+	.tdata :
+	{
+        __stdata__ = .;
+		*(.tdata .tdata.* .gnu.linkonce.td.*)
+        . = ALIGN(4);
+        __etdata__ = .;
+    } > INTERNAL_ROM
+
+	.tbss :
+	{
+        __stbss__ = .;
+		*(.tbss .tbss.* .gnu.linkonce.tb.*)
+		*(.tcommon)
+        . = ALIGN(4);
+        __etbss__ = .;
+    } > INTERNAL_ROM
+    
     . = ALIGN(4);
     __erom__ = .;
 
@@ -34,7 +51,7 @@ SECTIONS
         __edata__ = .;
     } > INTERNAL_RAM
 
-    .bss : ALIGN (4)
+    .bss : ALIGN(4)
     {
         __sbss__ = .;
         *(.bss*)
