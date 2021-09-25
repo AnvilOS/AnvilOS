@@ -275,6 +275,11 @@ int _Anvil_printf(const char *fmt, va_list ap, int (*nputs)(void *, const char *
                  print_str(&ctx);
                  break;
              case 'p':
+                 ctx.flags = (FLAG_UNSIGNED | FLAG_HEX | FLAG_ZEROPAD);
+                 ctx.field_width = 8;
+                 ctx.precision = INT_MAX;
+                 print_num(&ctx);
+                 break;
              case 'n':
                  break;
              default:
