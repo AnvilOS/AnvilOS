@@ -1,5 +1,5 @@
 
-#include <stdio.h>
+#include "_Anvil_stdio.h"
 
 size_t fwrite(const void *restrict ptr, size_t size, size_t nmemb, FILE *restrict stream)
 {

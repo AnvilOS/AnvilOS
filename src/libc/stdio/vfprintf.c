@@ -1,5 +1,5 @@
 
-#include <stdio.h>
+#include "_Anvil_stdio.h"
 #include <stdarg.h>
 #include <string.h>
 #include "debug.h"

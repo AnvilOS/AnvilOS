@@ -20,9 +20,8 @@ MODULE_LDFLAGS := \
     -Wl,-Map,"armcpp.map"
  
 MODULE_CPPFLAGS := \
+	-I$(SRCDIR) \
     -I$(SRCDIR)/../bsp \
-    -I$(SRCDIR)/../libc/inc \
-	-I$(PROJECT_ROOT)/libc/test \
     -nostartfiles \
     -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables
 

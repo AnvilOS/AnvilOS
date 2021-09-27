@@ -30,7 +30,7 @@ static const char read_file_data[500 + 11 + 7] =
     "22222222222"
     "3456789";
 
-long _Anvil_read(int fildes, const void *buf, size_t nbyte)
+long _Anvil_read(int fildes, void *buf, size_t nbyte)
 {
     if (fildes == 4)
     {

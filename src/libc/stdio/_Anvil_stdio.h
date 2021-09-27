@@ -26,7 +26,7 @@ void _Anvil_initbuf(FILE *restrict stream);
 int _Anvil_fgetc(FILE *__stream);
 int _Anvil_fputc(int __c, FILE *__stream);
 long _Anvil_write(int __fildes, const void *__buf, size_t __nbyte);
-long _Anvil_read(int __fildes, const void *__buf, size_t __nbyte);
+long _Anvil_read(int __fildes, void *__buf, size_t __nbyte);
 int _Anvil_fflush(FILE *__stream);
 int _Anvil_open(const char *__path, int __oflag);
 int _Anvil_close(int __fd);

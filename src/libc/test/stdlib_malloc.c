@@ -3,6 +3,9 @@
 
 #include "test_harness.h"
 
+// This should probably be added to stdlib properly
+int heap_check();
+
 TEST_GROUP(stdlib_malloc)
 
 size_t sizeof_block(void *p)

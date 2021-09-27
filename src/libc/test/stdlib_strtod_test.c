@@ -8,7 +8,19 @@
 
 #include "test_harness.h"
 #include "double_test_data.h"
-#include "../stdlib/_Anvil_double.h"
+
+enum
+{
+    e_relative,
+    e_absolute,
+};
+
+union double_bits
+{
+    double dbl;
+    uint64_t uint;
+    uint32_t uint32[2];
+};
 
 extern char *_Anvil_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve);
 extern char *gdtoa_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve);
@@ -213,7 +225,7 @@ int stdlib_strtod_test()
 //    CALL_TEST(stdlib_strtod, dtoa_test_mode_4);
 //    CALL_TEST(stdlib_strtod, dtoa_test_mode_5);
 
-    extern int cc0, cc1, cc2, cc3, cc4, cc5, cc6, qq1, qq2, smallest_div, small, big, biggest;
+    extern int cc0, cc1, cc2, cc3, cc4, cc5, cc6, qq1, qq2, smallest_div, biggest;
     extern int malloc_cnt, realloc_cnt, loops;
     printf("CC %d %d %d %d %d %d %d\n", cc0, cc1, cc2, cc3, cc4, cc5, cc6);
     printf("QQ %d %d %d\n", qq1, qq2, smallest_div);

@@ -613,23 +613,6 @@ static int print_num(struct printf_ctx *ctx)
     return 0;
 }
 
-static int debug_print_num(struct printf_ctx *ctx, unsigned long long val, int radix)
-{
-    char buf[50];
-    char *p_num;
-    int num_len;
-
-    p_num = &buf[50];
-    num_len = 0;
-    while (val)
-    {
-        *--p_num = lower_digit[val % radix];
-        val /= radix;
-        ++num_len;
-    }
-    return ctx->nputs(ctx->arg, p_num, num_len);
-}
-
 extern char *_Anvil_dtoa(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve);
 
 static int print_double(struct printf_ctx *ctx)

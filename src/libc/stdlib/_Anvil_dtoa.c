@@ -168,6 +168,7 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
 //		++S5e;
 //		++S2e;
     }
+    // sz needs to be an int because it may be negative
     int sz = cutoff_mode == e_relative ? ndigits : ndigits + k;
 //    printf("strlen=%lu %lu\n", strlen(ret_str), sz);
     if (sz < 1)
@@ -308,11 +309,11 @@ char *_Anvil_dtoa(double dd, int cutoff_mode, int ndigits, int *decpt, int *sign
     _Anvil_xint_delete(&R);
     _Anvil_xint_delete(&S);
 
-    if (strlen(ret_str) + 1 > sz)
-    {
-        printf("strlen=%lu %d %d %s", strlen(ret_str), sz, cutoff_place, ret_str);
-        printf("\n");
-    }
+//    if (strlen(ret_str) + 1 > sz)
+//    {
+//        printf("strlen=%lu %d %d %s", strlen(ret_str), sz, cutoff_place, ret_str);
+//        printf("\n");
+//    }
     
     return ret_str;
 }

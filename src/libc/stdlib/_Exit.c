@@ -3,4 +3,7 @@
 
 _Noreturn void _Exit(int status)
 {
+	while (1)
+	{
+	}
 }
