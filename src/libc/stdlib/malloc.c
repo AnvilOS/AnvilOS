@@ -24,6 +24,9 @@
 #define BLK_PREV_IN_USE       (1<<0)
 #define BLK_BITMASK         (BLK_PREV_IN_USE)
 
+#define LOCK() do {} while (0);
+#define UNLOCK() do {} while (0);
+
 static const size_t s_min_blk_size = 2 * sizeof(size_t) + 2 * sizeof(void *);
 
 struct malblk
@@ -56,6 +59,7 @@ typedef struct bucket bucket_t;
 // The malloc context
 struct mal_context
 {
+    int initialised;
     bucket_t *bucket;
     malblk_t *first_blk;
     size_t free;
@@ -417,8 +421,6 @@ int _Anvil_heap_check(int verbose)
     return 0;
 }
 
-static int initialised = 0;
-
 void initialise()
 {
     char *heap_start;
@@ -499,12 +501,6 @@ void *malloc(size_t requested_size)
     malloc_debug("---------------------------------\n", requested_size);
     malloc_debug("malloc %d bytes\n", requested_size);
 
-    if (!initialised)
-    {
-        initialise();
-        initialised = 1;
-    }
-
     // The function will return 0 if an error occurs
     if ((req_blk_size = malblk_size(requested_size)) == 0)
     {
@@ -512,10 +508,19 @@ void *malloc(size_t requested_size)
     }
     malloc_debug("size %d bytes\n", req_blk_size);
 
+    LOCK();
+
+    if (!mal_ctx.initialised)
+    {
+        initialise();
+        mal_ctx.initialised = 1;
+    }
+
     // Search for some memory in the free list
     if ((new_blk = freelist_get(req_blk_size)) == NULL)
     {
         // That's it, no more memory
+    	UNLOCK();
         return NULL;
     }
 
@@ -543,7 +548,9 @@ void *malloc(size_t requested_size)
     _Anvil_heap_check(1);
 #endif
 
-    return blk_to_ptr(new_blk);
+	UNLOCK();
+
+	return blk_to_ptr(new_blk);
 }
 
 void free(void *ptr)
@@ -561,6 +568,8 @@ void free(void *ptr)
     }
 
     blk = ptr_to_blk(ptr);
+
+    LOCK();
 
     mal_ctx.free += blk_size_get(blk);
 
@@ -592,6 +601,8 @@ void free(void *ptr)
 #if defined (MALLOC_DEBUG)
     _Anvil_heap_check();
 #endif
+
+    UNLOCK();
 }
 
 void *realloc(void *old_ptr, size_t requested_size)
@@ -617,6 +628,8 @@ void *realloc(void *old_ptr, size_t requested_size)
     }
 
     malloc_debug("size %d bytes\n", req_blk_size);
+
+    LOCK();
 
     orig_blk = ptr_to_blk(old_ptr);
     orig_size = blk_size_get(orig_blk);
@@ -662,8 +675,12 @@ void *realloc(void *old_ptr, size_t requested_size)
 #if defined (MALLOC_DEBUG)
         _Anvil_heap_check(1);
 #endif
+        UNLOCK();
         return old_ptr;
     }
+
+    // From here on we're calling functions that have locks, so...
+    UNLOCK();
 
     // If we get here it all failed so we need to do it the slow way
     new_ptr = malloc(requested_size);
@@ -674,10 +691,6 @@ void *realloc(void *old_ptr, size_t requested_size)
 
     memcpy(new_ptr, old_ptr, orig_size);
     free(old_ptr);
-
-#if defined (MALLOC_DEBUG)
-    _Anvil_heap_check(1);
-#endif
 
     return new_ptr;
 }
