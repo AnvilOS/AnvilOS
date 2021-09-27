@@ -1,7 +1,6 @@
 
-#include "debug.h"
-
 #include "libc_test.h"
+#include <stdlib.h>
 
 int libc_test()
 {
@@ -18,6 +17,8 @@ int libc_test()
     setjmp_test();
 
     __test_harness_print_string("[ All tests done! ]\n");
+
+    _Anvil_heap_check(1);
 
     return 0;
 }

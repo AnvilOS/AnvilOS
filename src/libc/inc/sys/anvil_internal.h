@@ -103,6 +103,7 @@ long long _Anvil_strtoll(const char *restrict __str,
 double _Anvil_strtod(const char *restrict nptr, char **restrict endptr);
 
 int _Anvil_printf(const char *__fmt, _Anvil_va_list __ap, int (*__nputs)(void *, const char *, int), void *__arg);
+int _Anvil_heap_check(int __verbose);
 
 extern int _Errno;
 

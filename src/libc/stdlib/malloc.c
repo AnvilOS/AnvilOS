@@ -2,13 +2,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 //#define MALLOC_DEBUG
 #if !defined (MALLOC_DEBUG)
 #define malloc_debug(...)
 #else
 #define MALLOC_DEBUG
-#include <stdio.h>
 #define malloc_debug(...) printf(__VA_ARGS__)
 #endif
 
@@ -318,7 +318,7 @@ static size_t malblk_size(size_t requested_size)
 extern char __ebss__;
 extern char __eram__;
 
-int heap_check()
+int _Anvil_heap_check(int verbose)
 {
     malblk_t *item;
     int item_is_free = -1;
@@ -330,7 +330,10 @@ int heap_check()
     /* Move to the first item */
     item = (malblk_t *)mal_ctx.first_blk;
 
-    malloc_debug("=========================\n");
+	if (verbose)
+    {
+		printf("=========================\n");
+    }
 
     while (1)
     {
@@ -346,8 +349,11 @@ int heap_check()
 
         if (blk_size_get(item) == 0)
         {
-            malloc_debug(" %08lx %4d(%4x)   %s\n", item, size, size, flags?"*":"");
-            break;
+        	if (verbose)
+            {
+        		printf(" %08lx %4d(%4x)   %s\n", item, size, size, flags?"*":"");
+            }
+        	break;
         }
 
         if (flags & 0x1)
@@ -362,8 +368,11 @@ int heap_check()
         if (item_is_free != -1 && !flags && item_is_free)
         {
             // This item and the previous are both free
-            malloc_debug("CONSECUTIVE FREE ITEMS\n");
-            return -1;
+        	if (verbose)
+            {
+        		printf("CONSECUTIVE FREE ITEMS\n");
+            }
+        	return -1;
         }
 
         // Check that the 2nd size is correct if the item is free
@@ -371,8 +380,11 @@ int heap_check()
         {
             if ((item->size_this & ~0x7) != next_item->size_prev)
             {
-                malloc_debug("Bad 2nd size %08x %08x!!\n", item->size_this, next_item->size_prev);
-                return -1;
+            	if (verbose)
+                {
+            		printf("Bad 2nd size %08x %08x!!\n", item->size_this, next_item->size_prev);
+                }
+            	return -1;
             }
             item_is_free = 1;
         }
@@ -382,19 +394,25 @@ int heap_check()
         }
 
         // Print info for item
-        malloc_debug(" %08lx %4d(%4x)   %s\n", item, size, size, flags?"*":"");
+    	if (verbose)
+        {
+    		printf(" %08lx %4d(%4x)   %s\n", item, size, size, flags?"*":"");
+        }
 
         item = next_item;
     }
 
-    malloc_debug("Free %u %u\n", total_free, mal_ctx.free);
-    malloc_debug("Used %u\n", total_used);
-    if (total_free != mal_ctx.free)
+	if (verbose)
     {
-        malloc_debug("WRONG FREE AMOUNT\n");
-        return -1;
+		printf("Free %u %u\n", total_free, mal_ctx.free);
+    	printf("Used %u\n", total_used);
+        if (total_free != mal_ctx.free)
+        {
+        	printf("WRONG FREE AMOUNT\n");
+            return -1;
+        }
+        printf("=========================\n");
     }
-    malloc_debug("=========================\n");
 
     return 0;
 }
@@ -468,7 +486,7 @@ void initialise()
     mal_ctx.free = heap_len;
 
 #if defined (MALLOC_DEBUG)
-    heap_check();
+    _Anvil_heap_check(1);
 #endif
 }
 
@@ -522,7 +540,7 @@ void *malloc(size_t requested_size)
     mal_ctx.free -= blk_size_get(new_blk);
 
 #if defined (MALLOC_DEBUG)
-    heap_check();
+    _Anvil_heap_check(1);
 #endif
 
     return blk_to_ptr(new_blk);
@@ -572,7 +590,7 @@ void free(void *ptr)
     freelist_put(blk);
 
 #if defined (MALLOC_DEBUG)
-    heap_check();
+    _Anvil_heap_check();
 #endif
 }
 
@@ -642,7 +660,7 @@ void *realloc(void *old_ptr, size_t requested_size)
             blk_used_set(orig_blk);
         }
 #if defined (MALLOC_DEBUG)
-        heap_check();
+        _Anvil_heap_check(1);
 #endif
         return old_ptr;
     }
@@ -658,7 +676,7 @@ void *realloc(void *old_ptr, size_t requested_size)
     free(old_ptr);
 
 #if defined (MALLOC_DEBUG)
-    heap_check();
+    _Anvil_heap_check(1);
 #endif
 
     return new_ptr;

@@ -8,15 +8,16 @@
 #include <stdlib.h>
 
 struct thread_obj thread_1;
+#define THREAD_1_STACK_SIZE (64)
 
-uint64_t stk1[64];
+uint64_t stk1[THREAD_1_STACK_SIZE];
 
 void thread_init()
 {
     thread_1.id = 1;
-    thread_1.stk_sz = 512;
+    thread_1.stk_sz = THREAD_1_STACK_SIZE * sizeof(uint64_t);
     thread_1.stk = stk1;
-    thread_1.psp = (uint32_t)(thread_1.stk + 64);
+    thread_1.psp = (uint32_t)(thread_1.stk + THREAD_1_STACK_SIZE);
     thread_1.tls_ptr = NULL;
 
     /* Point the psp at the thread 1 stack */

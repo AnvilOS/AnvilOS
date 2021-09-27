@@ -665,6 +665,7 @@ static int print_double(struct printf_ctx *ctx)
             ctx->nputs(ctx->arg, p, 1);
             ++p;
         }
+        free(str);
     }
     else if (ctx->flags & FLAG_EXP)
     {
@@ -695,6 +696,7 @@ static int print_double(struct printf_ctx *ctx)
             ++num_len;
         }
         ctx->nputs(ctx->arg, p_num, num_len);
+        free(str);
     }
     return 0;
 }

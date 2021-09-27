@@ -552,7 +552,7 @@ TEST(stdio_printf, fmt_f)
 {
     /* SPRINTF */
     int (* volatile SPRINTF)(char *restrict s, const char *restrict format, ...) = sprintf;
-    char buf[200];
+    char buf[50];
 
     struct test_point
     {
@@ -636,7 +636,9 @@ int stdio_printf_test()
     CALL_TEST(stdio_printf, fmt_sign);
     CALL_TEST(stdio_printf, fmt_precision);
 
-    //CALL_TEST(stdio_printf, fmt_f);
+    CALL_TEST(stdio_printf, fmt_f);
+
+    _Anvil_heap_check(1);
 
     END_TEST_GROUP(stdio_printf);
 }
