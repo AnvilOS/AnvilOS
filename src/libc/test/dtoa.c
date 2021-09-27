@@ -209,6 +209,9 @@
  *	used for input more than STRTOD_DIGLIM digits long (default 40).
  */
 
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 #define IEEE_8087
 //#define Arith_Kind_ASL 1
 //#define Long long
