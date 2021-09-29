@@ -24,9 +24,9 @@ void thread_init()
     psp_set((uint32_t)thread_1.psp);
 }
 
-int kcall_threadcreate(struct thread_obj *currt)
+int kcall_thread_create(struct thread_obj *currt)
 {
-    printf("kcall_threadcreate\n");
+    printf("kcall_thread_create\n");
 
     struct thread_obj *p_thr;
     p_thr = (struct thread_obj *)malloc(sizeof (struct thread_obj));
@@ -44,3 +44,16 @@ int kcall_threadcreate(struct thread_obj *currt)
 
     return 0;
 }
+
+int kcall_thread_join(struct thread_obj *currt)
+{
+    printf("kcall_thread_join\n");
+    return 0;
+}
+
+int kcall_thread_exit(struct thread_obj *currt)
+{
+    printf("kcall_thread_exit\n");
+    return 0;
+}
+

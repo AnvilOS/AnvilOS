@@ -15,6 +15,7 @@ int libc_test()
     time_test();
     stdio_io_test();
     setjmp_test();
+    threads_test();
 
     __test_harness_print_string("[ All tests done! ]\n");
 

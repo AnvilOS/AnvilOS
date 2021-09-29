@@ -15,5 +15,6 @@ int stdlib_malloc_test();
 int time_test();
 int stdio_io_test();
 int setjmp_test();
+int threads_test();
 
 #endif /* _LIBC_TEST_H_INCLUDED */
