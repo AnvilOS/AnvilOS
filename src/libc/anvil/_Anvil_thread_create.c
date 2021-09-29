@@ -3,7 +3,7 @@
 #include <sys/syscall_funcs.h>
 #include <sys/syscalls.h>
 
-int anvil_threadcreate(int (*start_routine)(void*), void *arg)
+int _Anvil_thread_create(int (*start_routine)(void*), void *arg)
 {
     return _Syscall2(__enum_kcall_threadcreate, (long)start_routine, (long)arg);
 }

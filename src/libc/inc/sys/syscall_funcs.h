@@ -9,6 +9,21 @@
 #include <stdint.h>
 #include <errno.h>
 
+static inline int _Syscall1(long __n, long __p1)
+{
+    register unsigned long ret __asm__ ("r0");
+    register unsigned long n __asm__ ("r0") = __n;
+    register unsigned long p1 __asm__ ("r1") = __p1;
+
+    __asm__ __volatile__ (
+            "svc #0\n\t"
+            : "=r" (ret)
+            : "r" (n), "r" (p1)
+            : "memory"
+    );
+    return ret;
+}
+
 static inline int _Syscall2(long __n, long __p1, long __p2)
 {
     register unsigned long ret __asm__ ("r0");
@@ -20,6 +35,23 @@ static inline int _Syscall2(long __n, long __p1, long __p2)
             "svc #0\n\t"
             : "=r" (ret)
             : "r" (n), "r" (p1), "r" (p2)
+            : "memory"
+    );
+    return ret;
+}
+
+static inline int _Syscall3(long __n, long __p1, long __p2, long __p3)
+{
+    register unsigned long ret __asm__ ("r0");
+    register unsigned long n __asm__ ("r0") = __n;
+    register unsigned long p1 __asm__ ("r1") = __p1;
+    register unsigned long p2 __asm__ ("r2") = __p2;
+    register unsigned long p3 __asm__ ("r3") = __p3;
+
+    __asm__ __volatile__ (
+            "svc #0\n\t"
+            : "=r" (ret)
+            : "r" (n), "r" (p1), "r" (p2), "r" (p3)
             : "memory"
     );
     return ret;

@@ -421,7 +421,7 @@ int _Anvil_heap_check(int verbose)
     return 0;
 }
 
-void initialise()
+static void initialise()
 {
     char *heap_start;
     size_t heap_len;

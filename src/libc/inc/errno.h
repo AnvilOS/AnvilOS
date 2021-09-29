@@ -13,6 +13,8 @@
 #define EINVAL      4
 #define ENOSYS      5
 
+#define ENOMEM      6
+
 #define errno _Errno
 
 #endif /* _ERRNO_H_INCLUDED */
