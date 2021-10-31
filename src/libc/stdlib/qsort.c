@@ -99,18 +99,37 @@ static size_t partition(char *p_low, size_t nmemb, size_t size, int (*compar)(co
     return (pj - p_low) / size;
 }
 
+struct Node
+{
+    char *base;
+    size_t nmemb;
+};
+
 void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
 {
+    struct Node stack[100];
+    size_t index = 0;
+    
+    stack[0].base = base;
+    stack[0].nmemb = nmemb;
+    ++index;
+    
+    while (index)
+    {
+        --index;
+        base = stack[index].base;
+        nmemb = stack[index].nmemb;
+        
     if (nmemb < 2)
     {
         // Nothing to do
-        return;
+            continue;
     }
     
     if (nmemb < 8)
     {
         insertion_sort(base, nmemb, size, compar);
-        return;
+            continue;
     }
 
     size_t j = partition(base, nmemb, size, compar);
@@ -118,6 +137,14 @@ void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, co
     // base[0] .. base[j-1]          =====> j items below the pivot
     // base[j]                       =====> the pivot in the correct place
     // base[j+1] .. base[nmemb-1]    =====> (nmemb-j-1) items above the pivot
-    qsort(base, j, size, compar);
-    qsort((char *)base + (j+1)*size, nmemb-j-1, size, compar);
+        //qsort(base, j, size, compar);
+        stack[index].base = base;
+        stack[index].nmemb = j;
+        ++index;
+
+        //qsort((char *)base + (j+1)*size, nmemb-j-1, size, compar);
+        stack[index].base = (char *)base + (j+1)*size;
+        stack[index].nmemb = nmemb-j-1;
+        ++index;
+    }
 }
