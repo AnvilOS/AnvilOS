@@ -5,25 +5,35 @@
 static inline void memswp(void *s1, void *s2, size_t n)
 {
     // Work with ints
-    int *si = (int *)s2;
-    int *di = (int *)s1;
-    while (n >= sizeof(int))
+    if ((((uintptr_t)s1 | (uintptr_t)s2) & 0x3) == 0)
     {
-        int tmp = *si;
-        *si++  = *di;
-        *di++  = tmp;
-        n -= sizeof(int);
+        while (n >= sizeof(int))
+        {
+            int tmp = *(int*)s2;
+            *(int*)s2++  = *(int*)s1;
+            *(int*)s1++  = tmp;
+            n -= sizeof(int);
+        }
     }
-
+    
     // Swap the remaining chars
-    char *sc = (char *)si;
-    char *dc = (char *)di;
     while (n)
     {
-        char tmp = *sc;
-        *sc++  = *dc;
-        *dc++  = tmp;
+        char tmp = *(char*)s2;
+        *(char*)s2++  = *(char*)s1;
+        *(char*)s1++  = tmp;
         --n;
+    }
+}
+
+static inline void insertion_sort(char *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
+{
+    for (size_t i=1; i<nmemb; ++i)
+    {
+        for (size_t j=i; j>0 && compar(base+(j-1)*size, base+j*size)>0; --j)
+        {
+            memswp(base+j*size, base+(j-1)*size, size);
+        }
     }
 }
 
@@ -76,6 +86,12 @@ void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, co
     if (nmemb < 2)
     {
         // Nothing to do
+        return;
+    }
+    
+    if (nmemb < 8)
+    {
+        insertion_sort(base, nmemb, size, compar);
         return;
     }
 
