@@ -48,6 +48,24 @@ static size_t partition(char *p_low, size_t nmemb, size_t size, int (*compar)(co
     // Point pj 1 above the end so the first pre-decrement finds the end item
     char *pj = p_high + size;
 
+    // Choose the pivot to be the median of the first middle and last positions then
+    // re-arrange the 3 items so that the pivot is in the first position.
+    // Therefore we want: p_mid <= p_low (pivot) <= p_high
+    char *p_mid = p_low + size * ((nmemb - 1) / 2);
+    
+    if (compar(p_high, p_low) < 0)
+    {
+        memswp(p_high, p_low, size);
+    }
+    if (compar(p_low, p_mid) < 0)
+    {
+        memswp(p_low, p_mid, size);
+        if (compar(p_high, p_low) < 0)
+        {
+            memswp(p_high, p_low, size);
+        }
+    }
+    
     while (1)
     {
         while (compar(pi += size, p_piv) < 0)
