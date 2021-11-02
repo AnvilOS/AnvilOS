@@ -112,9 +112,18 @@ static size_t partition(char *p_low, size_t nmemb, size_t size, int (*compar)(co
 
 void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
 {
-    struct Node stack[25];
+    // Work out how much stack we will need - basically log2(nmemb) + 1 for a margin
+    size_t log2 = 1;
+    size_t n = nmemb;
+    while (n)
+    {
+        n >>= 1;
+        ++log2;
+    }
+    
+    struct Node *stack = malloc(log2 * sizeof(struct Node));
     size_t index = 0;
-
+    
     while (1)
     {
         size_t n1 = partition(base, nmemb, size, compar);
@@ -184,4 +193,5 @@ void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, co
             }
         }
     }
+    free(stack);
 }
