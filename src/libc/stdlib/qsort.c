@@ -1,8 +1,17 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
-static inline void memswp(void *s1, void *s2, size_t n)
+static const size_t QSORT_LIMIT = 8;
+
+struct Node
+{
+    char *base;
+    size_t nmemb;
+};
+
+static void memswp(char *s1, char *s2, size_t n)
 {
     // Work with ints
     if ((((uintptr_t)s1 | (uintptr_t)s2) & 0x3) == 0)
@@ -10,8 +19,10 @@ static inline void memswp(void *s1, void *s2, size_t n)
         while (n >= sizeof(int))
         {
             int tmp = *(int*)s2;
-            *(int*)s2++  = *(int*)s1;
-            *(int*)s1++  = tmp;
+            *(int*)s2 = *(int*)s1;
+            *(int*)s1 = tmp;
+            s1 += sizeof(int);
+            s2 += sizeof(int);
             n -= sizeof(int);
         }
     }
@@ -19,14 +30,14 @@ static inline void memswp(void *s1, void *s2, size_t n)
     // Swap the remaining chars
     while (n)
     {
-        char tmp = *(char*)s2;
-        *(char*)s2++  = *(char*)s1;
-        *(char*)s1++  = tmp;
+        char tmp = *s2;
+        *s2++ = *s1;
+        *s1++ = tmp;
         --n;
     }
 }
 
-static inline void insertion_sort(char *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
+static void insertion_sort(char *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
 {
     for (size_t i=1; i<nmemb; ++i)
     {
@@ -78,10 +89,10 @@ static size_t partition(char *p_low, size_t nmemb, size_t size, int (*compar)(co
 
         while (compar(pj -= size, p_piv) > 0)
         {
-            if (pj == p_low)
-            {
-                break;
-            }
+//            if (pj == p_low)
+//            {
+//                break;
+//            }
         }
 
         if (pi >= pj)
@@ -99,52 +110,78 @@ static size_t partition(char *p_low, size_t nmemb, size_t size, int (*compar)(co
     return (pj - p_low) / size;
 }
 
-struct Node
-{
-    char *base;
-    size_t nmemb;
-};
-
 void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
 {
-    struct Node stack[100];
+    struct Node stack[25];
     size_t index = 0;
-    
-    stack[0].base = base;
-    stack[0].nmemb = nmemb;
-    ++index;
-    
-    while (index)
+
+    while (1)
     {
-        --index;
-        base = stack[index].base;
-        nmemb = stack[index].nmemb;
+        size_t n1 = partition(base, nmemb, size, compar);
+        size_t n2;
+        char *p1, *p2;
+
+        // base[0] .. base[n1-1]          =====> n1 items below the pivot
+        // base[n1]                       =====> the pivot in the correct place
+        // base[n1+1] .. base[nmemb-1]    =====> (nmemb-n1-1) items above the pivot
         
-    if (nmemb < 2)
-    {
-        // Nothing to do
-            continue;
-    }
-    
-    if (nmemb < 8)
-    {
-        insertion_sort(base, nmemb, size, compar);
-            continue;
-    }
-
-    size_t j = partition(base, nmemb, size, compar);
-
-    // base[0] .. base[j-1]          =====> j items below the pivot
-    // base[j]                       =====> the pivot in the correct place
-    // base[j+1] .. base[nmemb-1]    =====> (nmemb-j-1) items above the pivot
-        //qsort(base, j, size, compar);
-        stack[index].base = base;
-        stack[index].nmemb = j;
-        ++index;
-
-        //qsort((char *)base + (j+1)*size, nmemb-j-1, size, compar);
-        stack[index].base = (char *)base + (j+1)*size;
-        stack[index].nmemb = nmemb-j-1;
-        ++index;
+        // We have 2 partitions - look at the bigger one first
+        if (n1 > nmemb - n1 - 1)
+        {
+            p1 = base;
+            p2 = (char *)base + (n1+1) * size;
+            n2 = nmemb - n1 - 1;
+        }
+        else
+        {
+            p2 = base;
+            n2 = n1;
+            p1 = (char *)base + (n1+1) * size;
+            n1 = nmemb - n1 - 1;
+        }
+        
+        if (n2 >= QSORT_LIMIT)
+        {
+            // Both big so push the bigger
+            stack[index].base = p1;
+            stack[index].nmemb = n1;
+            ++index;
+            base = p2;
+            nmemb = n2;
+        }
+        else if (n1 >= QSORT_LIMIT)
+        {
+            // Only n1 is big enough to qsort
+            base = p1;
+            nmemb = n1;
+            if (n2 >= 2)
+            {
+                insertion_sort(p2, n2, size, compar);
+            }
+        }
+        else
+        {
+            // both too small so insertion sort them
+            if (n1 >= 2)
+            {
+                insertion_sort(p1, n1, size, compar);
+            }
+            if (n2 >= 2)
+            {
+                insertion_sort(p2, n2, size, compar);
+            }
+            if (index)
+            {
+                // pop another if available
+                --index;
+                base = stack[index].base;
+                nmemb = stack[index].nmemb;
+            }
+            else
+            {
+                // Nothing more to do
+                break;
+            }
+        }
     }
 }
