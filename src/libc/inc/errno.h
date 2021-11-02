@@ -15,6 +15,10 @@
 
 #define ENOMEM      6
 
+#define EDEADLK     7
+#define ESRCH       8
+#define EAGAIN      9
+
 #define errno _Errno
 
 #endif /* _ERRNO_H_INCLUDED */
