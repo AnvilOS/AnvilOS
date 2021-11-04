@@ -9,7 +9,7 @@ void *bsearch(const void *key, const void *base, size_t nmemb, size_t size, int 
     while (l <= r)
     {
         // Find the middle index without overflowing
-        int m = (l + r) / 2;
+        int m = l + (r - l) / 2;
         // and from that the middle element
         void *mel = (char *)base + m * size;
         int cmp = compar(mel, key);
