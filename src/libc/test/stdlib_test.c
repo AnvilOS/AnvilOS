@@ -245,7 +245,7 @@ TEST(stdlib, div)
     END_TEST(stdlib);
 }
 
-int compare(const void *p1, const void *p2)
+int qsort_compare(const void *p1, const void *p2)
 {
     const short *sh1 = p1;
     const short *sh2 = p2;
@@ -263,7 +263,7 @@ TEST(stdlib, qsort)
     {
         array[i] = rand() * array_sz / RAND_MAX;
     }
-    qsort(array, array_sz, 2, compare);
+    qsort(array, array_sz, 2, qsort_compare);
 
     for (unsigned i=0; i<array_sz-1; ++i)
     {
@@ -279,7 +279,7 @@ TEST(stdlib, qsort)
     {
         array[i] = i;
     }
-    qsort(array, array_sz, 2, compare);
+    qsort(array, array_sz, 2, qsort_compare);
     for (unsigned i=0; i<array_sz-1; ++i)
     {
         ASSERT_EQ(0, array[i] > array[i+1]);
@@ -294,7 +294,7 @@ TEST(stdlib, qsort)
     {
         array[i] = array_sz - i - 1;
     }
-    qsort(array, array_sz, 2, compare);
+    qsort(array, array_sz, 2, qsort_compare);
     for (unsigned i=0; i<array_sz-1; ++i)
     {
         ASSERT_EQ(0, array[i] > array[i+1]);
@@ -309,7 +309,7 @@ TEST(stdlib, qsort)
     {
         array[i] = 1000;
     }
-    qsort(array, array_sz, 2, compare);
+    qsort(array, array_sz, 2, qsort_compare);
     for (unsigned i=0; i<array_sz-1; ++i)
     {
         ASSERT_EQ(0, array[i] > array[i+1]);
@@ -324,6 +324,46 @@ TEST(stdlib, qsort)
     END_TEST(stdlib)
 }
 
+int bsearch_compare(const void *p1, const void *p2)
+{
+    const char *sh1 = p1;
+    const char *sh2 = p2;
+    return *sh1 - *sh2;
+}
+
+TEST(stdlib, bsearch)
+{
+    const char array[] = { 1, 2, 3, 3, 4, 4, 6, 7, 8, 9 };
+    char key;
+
+    key = 0;
+    ASSERT_PTR_EQ(NULL, bsearch(&key, array, 10, 1, bsearch_compare));
+
+    key = 1;
+    ASSERT_PTR_EQ(&array[0], bsearch(&key, array, 10, 1, bsearch_compare));
+
+    key = 2;
+    ASSERT_PTR_EQ(&array[1], bsearch(&key, array, 10, 1, bsearch_compare));
+
+    key = 4;
+    char *key4 = bsearch(&key, array, 10, 1, bsearch_compare);
+    ASSERT_EQ(1, key4 == &array[4] || key4 == &array[5]);
+
+    key = 5;
+    ASSERT_PTR_EQ(NULL, bsearch(&key, array, 10, 1, bsearch_compare));
+
+    key = 6;
+    ASSERT_PTR_EQ(&array[6], bsearch(&key, array, 10, 1, bsearch_compare));
+
+    key = 9;
+    ASSERT_PTR_EQ(&array[9], bsearch(&key, array, 10, 1, bsearch_compare));
+
+    key = 11;
+    ASSERT_PTR_EQ(NULL, bsearch(&key, array, 10, 1, bsearch_compare));
+
+    END_TEST(stdlib)
+}
+
 int stdlib_test()
 {
     CALL_TEST(stdlib, strtol);
@@ -334,6 +374,7 @@ int stdlib_test()
     CALL_TEST(stdlib, div);
 
     CALL_TEST(stdlib, qsort);
+    CALL_TEST(stdlib, bsearch);
 
     END_TEST_GROUP(stdlib);
 }

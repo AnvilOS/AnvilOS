@@ -3,13 +3,13 @@
 
 void *bsearch(const void *key, const void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
 {
-    size_t l = 0;
-    size_t r = nmemb - 1;
+    int l = 0;
+    int r = nmemb - 1;
 
     while (l <= r)
     {
         // Find the middle index without overflowing
-        size_t m = l + (r - l) / 2;
+        int m = (l + r) / 2;
         // and from that the middle element
         void *mel = (char *)base + m * size;
         int cmp = compar(mel, key);
