@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "test_harness.h"
 
@@ -244,6 +245,85 @@ TEST(stdlib, div)
     END_TEST(stdlib);
 }
 
+int compare(const void *p1, const void *p2)
+{
+    const short *sh1 = p1;
+    const short *sh2 = p2;
+    return *sh1 - *sh2;
+}
+
+static const int array_sz = 2048;
+
+TEST(stdlib, qsort)
+{
+    short *array = (short *)malloc(array_sz * sizeof(short));
+    ASSERT_PTR_NE(NULL, array);
+
+    for (int i=0; i<array_sz; ++i)
+    {
+        array[i] = rand() * array_sz / RAND_MAX;
+    }
+    qsort(array, array_sz, 2, compare);
+
+    for (unsigned i=0; i<array_sz-1; ++i)
+    {
+        ASSERT_EQ(0, array[i] > array[i+1]);
+        if (array[i] > array[i+1])
+        {
+            printf("Bad sort %d: %u %u\n", i, array[i], array[i+1]);
+        }
+    }
+
+    // Try sorting an array that's already sorted
+    for (int i=0; i<array_sz; ++i)
+    {
+        array[i] = i;
+    }
+    qsort(array, array_sz, 2, compare);
+    for (unsigned i=0; i<array_sz-1; ++i)
+    {
+        ASSERT_EQ(0, array[i] > array[i+1]);
+        if (array[i] > array[i+1])
+        {
+            printf("Bad sort %d: %u %u\n", i, array[i], array[i+1]);
+        }
+    }
+
+    // Now one in reverse
+    for (int i=0; i<array_sz; ++i)
+    {
+        array[i] = array_sz - i - 1;
+    }
+    qsort(array, array_sz, 2, compare);
+    for (unsigned i=0; i<array_sz-1; ++i)
+    {
+        ASSERT_EQ(0, array[i] > array[i+1]);
+        if (array[i] > array[i+1])
+        {
+            printf("Bad sort %d: %u %u\n", i, array[i], array[i+1]);
+        }
+    }
+
+    // Now sort an array of identical items
+    for (int i=0; i<array_sz; ++i)
+    {
+        array[i] = 1000;
+    }
+    qsort(array, array_sz, 2, compare);
+    for (unsigned i=0; i<array_sz-1; ++i)
+    {
+        ASSERT_EQ(0, array[i] > array[i+1]);
+        if (array[i] > array[i+1])
+        {
+            printf("Bad sort %d: %u %u\n", i, array[i], array[i+1]);
+        }
+    }
+
+    free(array);
+
+    END_TEST(stdlib)
+}
+
 int stdlib_test()
 {
     CALL_TEST(stdlib, strtol);
@@ -252,6 +332,8 @@ int stdlib_test()
     CALL_TEST(stdlib, strtoull);
 
     CALL_TEST(stdlib, div);
+
+    CALL_TEST(stdlib, qsort);
 
     END_TEST_GROUP(stdlib);
 }
