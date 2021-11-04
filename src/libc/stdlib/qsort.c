@@ -1,6 +1,5 @@
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdint.h>
 
 static const size_t QSORT_LIMIT = 8;
@@ -112,6 +111,11 @@ static size_t partition(char *p_low, size_t nmemb, size_t size, int (*compar)(co
 
 void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *))
 {
+    if (nmemb < 2)
+    {
+        return;
+    }
+
     // Work out how much stack we will need - basically log2(nmemb) + 1 for a margin
     size_t log2 = 1;
     size_t n = nmemb;

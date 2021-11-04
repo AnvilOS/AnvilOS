@@ -254,7 +254,30 @@ int qsort_compare(const void *p1, const void *p2)
 
 static const int array_sz = 2048;
 
-TEST(stdlib, qsort)
+TEST(stdlib, qsort_limits)
+{
+    short array[] = { 2, 1 };
+
+    qsort(array, 0, 2, qsort_compare);
+    ASSERT_EQ(2, array[0]);
+    ASSERT_EQ(1, array[1]);
+
+    qsort(array, 1, 2, qsort_compare);
+    ASSERT_EQ(2, array[0]);
+    ASSERT_EQ(1, array[1]);
+
+    qsort(array+1, 1, 2, qsort_compare);
+    ASSERT_EQ(2, array[0]);
+    ASSERT_EQ(1, array[1]);
+
+    qsort(array, 2, 2, qsort_compare);
+    ASSERT_EQ(1, array[0]);
+    ASSERT_EQ(2, array[1]);
+
+    END_TEST(stdlib)
+}
+
+TEST(stdlib, qsort_algorithm)
 {
     short *array = (short *)malloc(array_sz * sizeof(short));
     ASSERT_PTR_NE(NULL, array);
@@ -268,10 +291,6 @@ TEST(stdlib, qsort)
     for (unsigned i=0; i<array_sz-1; ++i)
     {
         ASSERT_EQ(0, array[i] > array[i+1]);
-        if (array[i] > array[i+1])
-        {
-            printf("Bad sort %d: %u %u\n", i, array[i], array[i+1]);
-        }
     }
 
     // Try sorting an array that's already sorted
@@ -283,10 +302,6 @@ TEST(stdlib, qsort)
     for (unsigned i=0; i<array_sz-1; ++i)
     {
         ASSERT_EQ(0, array[i] > array[i+1]);
-        if (array[i] > array[i+1])
-        {
-            printf("Bad sort %d: %u %u\n", i, array[i], array[i+1]);
-        }
     }
 
     // Now one in reverse
@@ -298,10 +313,6 @@ TEST(stdlib, qsort)
     for (unsigned i=0; i<array_sz-1; ++i)
     {
         ASSERT_EQ(0, array[i] > array[i+1]);
-        if (array[i] > array[i+1])
-        {
-            printf("Bad sort %d: %u %u\n", i, array[i], array[i+1]);
-        }
     }
 
     // Now sort an array of identical items
@@ -313,10 +324,6 @@ TEST(stdlib, qsort)
     for (unsigned i=0; i<array_sz-1; ++i)
     {
         ASSERT_EQ(0, array[i] > array[i+1]);
-        if (array[i] > array[i+1])
-        {
-            printf("Bad sort %d: %u %u\n", i, array[i], array[i+1]);
-        }
     }
 
     free(array);
@@ -373,7 +380,8 @@ int stdlib_test()
 
     CALL_TEST(stdlib, div);
 
-    CALL_TEST(stdlib, qsort);
+    CALL_TEST(stdlib, qsort_limits);
+    CALL_TEST(stdlib, qsort_algorithm);
     CALL_TEST(stdlib, bsearch);
 
     END_TEST_GROUP(stdlib);
