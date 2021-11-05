@@ -599,7 +599,7 @@ void free(void *ptr)
     freelist_put(blk);
 
 #if defined (MALLOC_DEBUG)
-    _Anvil_heap_check();
+    _Anvil_heap_check(1);
 #endif
 
     UNLOCK();

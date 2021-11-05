@@ -84,6 +84,7 @@ int dtoa_test_one(double dd, int gdtoa_mode, int anvil_mode, int ndigits)
         free(pstr);
         return -1;
     }
+    freedtoa(gd_pstr);
     free(pstr);
     return 0;
 }
