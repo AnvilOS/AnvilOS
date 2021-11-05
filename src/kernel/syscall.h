@@ -9,10 +9,10 @@
 #include <sys/_syscall_list.h>
 #undef SYSCALL
 
-#define PARM1 (currt->reg->r0)
-#define PARM2 (currt->reg->r1)
-#define PARM3 (currt->reg->r2)
-#define PARM4 (currt->reg->r3)
+#define PARM0 (currt->reg->r0)
+#define PARM1 (currt->reg->r1)
+#define PARM2 (currt->reg->r2)
+#define PARM3 (currt->reg->r3)
 #define RETVAL (currt->reg->r0)
 
 #endif /* SYSCALL_H_INCLUDED */

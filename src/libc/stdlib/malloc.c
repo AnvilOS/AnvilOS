@@ -336,7 +336,7 @@ int _Anvil_heap_check(int verbose)
 
 	if (verbose)
     {
-		printf("=========================\n");
+		malloc_debug("=========================\n");
     }
 
     while (1)
@@ -355,7 +355,7 @@ int _Anvil_heap_check(int verbose)
         {
         	if (verbose)
             {
-        		printf(" %08lx %4d(%4x)   %s\n", item, size, size, flags?"*":"");
+        		malloc_debug(" %08lx %4d(%4x)   %s\n", item, size, size, flags?"*":"");
             }
         	break;
         }
@@ -374,7 +374,7 @@ int _Anvil_heap_check(int verbose)
             // This item and the previous are both free
         	if (verbose)
             {
-        		printf("CONSECUTIVE FREE ITEMS\n");
+        		malloc_debug("CONSECUTIVE FREE ITEMS\n");
             }
         	return -1;
         }
@@ -386,7 +386,7 @@ int _Anvil_heap_check(int verbose)
             {
             	if (verbose)
                 {
-            		printf("Bad 2nd size %08x %08x!!\n", item->size_this, next_item->size_prev);
+            		malloc_debug("Bad 2nd size %08x %08x!!\n", item->size_this, next_item->size_prev);
                 }
             	return -1;
             }
@@ -400,7 +400,7 @@ int _Anvil_heap_check(int verbose)
         // Print info for item
     	if (verbose)
         {
-    		printf(" %08lx %4d(%4x)   %s\n", item, size, size, flags?"*":"");
+    		malloc_debug(" %08lx %4d(%4x)   %s\n", item, size, size, flags?"*":"");
         }
 
         item = next_item;
@@ -408,14 +408,14 @@ int _Anvil_heap_check(int verbose)
 
 	if (verbose)
     {
-		printf("Free %u %u\n", total_free, mal_ctx.free);
-    	printf("Used %u\n", total_used);
+		malloc_debug("Free %u %u\n", total_free, mal_ctx.free);
+    	malloc_debug("Used %u\n", total_used);
         if (total_free != mal_ctx.free)
         {
-        	printf("WRONG FREE AMOUNT\n");
+        	malloc_debug("WRONG FREE AMOUNT\n");
             return -1;
         }
-        printf("=========================\n");
+        malloc_debug("=========================\n\n");
     }
 
     return 0;

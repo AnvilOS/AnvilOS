@@ -47,7 +47,7 @@ void syscall()
     currt->psp = psp_get();
     currt->reg = (struct regpack *)(currt->psp);
 
-    int syscall = PARM1;
+    int syscall = PARM0;
 
     printf("r0=%lx r1=%lx r2=%lx\n", PARM1, PARM2, PARM3);
 
