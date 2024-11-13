@@ -1,2 +1,2 @@
 # AnvilOS
-A standards conforming embedded kernel
+A standard-conforming embedded kernel
