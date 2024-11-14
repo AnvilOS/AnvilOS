@@ -112,7 +112,7 @@ export GCC_VER=9.1.0
 export GMP_VER=6.1.1
 export MPC_VER=1.0.3
 export MPFR_VER=3.1.4
-export GDB_VER=8.3
+export GDB_VER=9.1
 
 # ======== CLEAN ====================
 

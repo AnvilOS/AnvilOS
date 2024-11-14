@@ -1,0 +1,11 @@
+{
+    "makefile.makefilePath": "src/Makefile",
+    "files.associations": {
+        "string.h": "c",
+        "ctype.h": "c",
+        "syscall_funcs.h": "c",
+        "anvil_internal.h": "c",
+        "_syscall_list.h": "c",
+        "syscalls.h": "c"
+    }
+}

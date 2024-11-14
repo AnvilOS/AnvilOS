@@ -1,5 +1,5 @@
 
-CROSS_PREFIX := arm-anvil-eabi
+CROSS_PREFIX := $(PROJECT_ROOT)/../cross-tools/bin/arm-anvil-eabi
 ARCH := arm
 BSP := stm32
 
