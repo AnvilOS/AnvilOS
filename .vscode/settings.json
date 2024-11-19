@@ -6,6 +6,18 @@
         "syscall_funcs.h": "c",
         "anvil_internal.h": "c",
         "_syscall_list.h": "c",
-        "syscalls.h": "c"
-    }
+        "syscalls.h": "c",
+        "__locale": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "timer.h": "c"
+    },
+    "cortex-debug.variableUseNaturalFormat": false,
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/Users/gerryg/AnvilOS/build/kernel",
+            "binaryPath": "/Users/gerryg/AnvilOS/build/kernel/anvil",
+            "binaryArgs": []
+        }
+    ]
 }

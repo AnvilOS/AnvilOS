@@ -6,8 +6,6 @@ LIBS := ../bsp/libbsp.a
 EXTRA_DEPS := ../libc/libc.a arm/lnfile.ld
 
 MODULE_LDFLAGS := \
-    -L../bsp/ \
-    -lbsp \
     -nostartfiles \
     -fno-exceptions \
     -fno-unwind-tables \
@@ -21,7 +19,13 @@ MODULE_LDFLAGS := \
  
 MODULE_CPPFLAGS := \
 	-I$(SRCDIR) \
+	-I$(SRCDIR)/../bsp/stm32-u5/inc 										\
+	-I$(SRCDIR)/../bsp/stm32-u5/CMSIS/Device/ST/STM32U5xx/Include 	\
+	-I$(SRCDIR)/../bsp/stm32-u5/CMSIS/Include 					\
+	-I$(SRCDIR)/../bsp/stm32-u5/BSP/Components/Common 			\
+	-I$(SRCDIR)/../bsp/stm32-u5/BSP/B-U585I-IOT02A 			\
     -I$(SRCDIR)/../bsp \
+    -I$(SRCDIR)/../bsp/stm32-u5/STM32U5xx_HAL_Driver/Inc \
     -nostartfiles \
     -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables
 

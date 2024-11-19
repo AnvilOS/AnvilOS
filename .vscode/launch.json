@@ -12,7 +12,7 @@
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
-            "configFiles": [ "board/stm32vldiscovery.cfg" ],
+            "configFiles": [ "board/b-u585i-iot02a.cfg" ],
             "searchDir": [],
             "runToEntryPoint": "main",
             "showDevDebugOutput": "raw",

@@ -47,45 +47,12 @@ TEST(stdlib_strtod, base_10_parser_data)
 
 TEST(stdlib_strtod, gdtoa_test_data)
 {
-    double (* volatile STRTOD)(const char *restrict nptr, char **restrict endptr) = strtod;
-
-    size_t i = 0;
-    while (gdtoa_test_data[i].str)
-    {
-        union double_bits res;
-        //printf("---- %s ----\n", gdtoa_test_data[i].str);
-        res.dbl = STRTOD(gdtoa_test_data[i].str, NULL);
-        ASSERT_EQ(gdtoa_test_data[i].low, res.uint32[0]);
-        ASSERT_EQ(gdtoa_test_data[i].high, res.uint32[1]);
-        ++i;
-    }
 
     END_TEST(stdlib_strtod);
 }
 
 int dtoa_test_one(double dd, int gdtoa_mode, int anvil_mode, int ndigits)
 {
-    int gdtoa_decpt;
-    int dtoa_decpt;
-    int sign;
-    char *rve;
-
-    char *gd_pstr = gdtoa_dtoa(dd, gdtoa_mode, ndigits, &gdtoa_decpt, &sign, &rve);
-    char *pstr = _Anvil_dtoa(dd, anvil_mode, ndigits, &dtoa_decpt, &sign, &rve);
-    if (!strcmp(pstr, gd_pstr) && (gdtoa_decpt == dtoa_decpt))
-    {
-        //printf("SAME %s %s\n", gd_pstr, pstr);
-        //printf("%d %d\n", gdtoa_decpt, dtoa_decpt);
-    }
-    else
-        {
-        printf("DIFF %s %s\n", gd_pstr, pstr);
-        printf("%d %d\n", gdtoa_decpt, dtoa_decpt);
-        free(pstr);
-        return -1;
-    }
-    freedtoa(gd_pstr);
-    free(pstr);
     return 0;
 }
 

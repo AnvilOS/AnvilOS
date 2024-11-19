@@ -445,7 +445,7 @@ static void initialise()
 //    }
 
     // We need to align to 2 x sizeof(size_t)
-    heap_start = &__ebss__;
+//    heap_start = &__ebss__;
     while ((uintptr_t)heap_start & (ALIGNMENT - 1))
     {
         ++heap_start;
@@ -453,7 +453,7 @@ static void initialise()
     malloc_debug("heap_start  = %08x\n", heap_start);
 
     // How much heap have we got?
-    heap_len = &__eram__ - heap_start;
+//    heap_len = &__eram__ - heap_start;
     malloc_debug("heap_len    = %08x\n", heap_len);
 
     mal_ctx.bucket = (bucket_t *)heap_start;

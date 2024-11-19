@@ -57,7 +57,7 @@ ifdef BINARY
 all: $(BINARY)
 $(BINARY): $(OBJECTS) $(LIBS) $(EXTRA_DEPS)
 	@echo "          LD $(NICE_DIR_NAME)/$(BINARY)"
-	$(LD) -o $@ $(OBJECTS) $(LIBS) $(ALL_LDFLAGS)
+	$(LD) -o $@ $(OBJECTS) -Wl,--whole-archive $(LIBS) -Wl,--no-whole-archive $(ALL_LDFLAGS)
 endif
 
 # We know how to build LIBRARIES
