@@ -319,8 +319,8 @@ static size_t malblk_size(size_t requested_size)
     return block_size;
 }
 
-extern char __ebss__;
-extern char __eram__;
+extern char _end;
+extern char _estack;
 
 int _Anvil_heap_check(int verbose)
 {
@@ -429,8 +429,8 @@ static void initialise()
 
     // In this version of malloc we take all available memory and use it to create the heap
     malloc_debug("Malloc initialise\n");
-    malloc_debug("__ebss__ = %08x\n", &__ebss__);
-    malloc_debug("__erom__ = %08x\n", &__eram__);
+    malloc_debug("_end = %08x\n", &_end);
+    malloc_debug("_estack = %08x\n", &_estack);
     malloc_debug("s_min_blk_size = %d\n", s_min_blk_size);
 
 //    int bkt_num = 0;
@@ -445,7 +445,7 @@ static void initialise()
 //    }
 
     // We need to align to 2 x sizeof(size_t)
-//    heap_start = &__ebss__;
+    heap_start = &_end;
     while ((uintptr_t)heap_start & (ALIGNMENT - 1))
     {
         ++heap_start;
@@ -453,7 +453,7 @@ static void initialise()
     malloc_debug("heap_start  = %08x\n", heap_start);
 
     // How much heap have we got?
-//    heap_len = &__eram__ - heap_start;
+    heap_len = &_estack - 0x2000 - heap_start;
     malloc_debug("heap_len    = %08x\n", heap_len);
 
     mal_ctx.bucket = (bucket_t *)heap_start;

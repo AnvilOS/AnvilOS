@@ -13,19 +13,18 @@ extern int libc_test();
 
 int main()
 {
-    debug_init();
     printf("Hello, world\n\r");
-////    sys_tick_init();
-//    libc_test();
-    int i = 0;
+    //sys_tick_init();
+    libc_test();
     while (1)
     {
-    	printf("<%d>\n\r", ++i);
+
     }
 }
 
 void __libc_init_array()
 {
+    bsp_init();
 }
 
 void debug_putc(int ch)

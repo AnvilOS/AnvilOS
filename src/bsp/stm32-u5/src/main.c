@@ -74,7 +74,7 @@ extern DMA_QListTypeDef MDFQueue;
   * @brief  The application entry point.
   * @retval int
   */
-int premain(void)
+int bsp_init(void)
 {
   /* USER CODE BEGIN 1 */
   /* STM32U5xx HAL library initialization:
@@ -147,12 +147,12 @@ int premain(void)
 
 //  BSP_LED_On(LED_RED);
 
-  printf("Hello world\n\r");
-  int i = 0;
-  while (1)
-  {
-    /* Enter the system to Stop 2 mode */
-	  printf("<%d>\n\r", ++i);
+  // printf("Hello world\n\r");
+  // int i = 0;
+  // while (1)
+  // {
+  //   /* Enter the system to Stop 2 mode */
+//	  printf("<%d>\n\r", ++i);
 	  // BSP_LED_On(LED_GREEN);
 
 	  // BSP_LED_On(LED_RED);
@@ -164,7 +164,7 @@ int premain(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+//  }
   /* USER CODE END 3 */
 }
 
