@@ -27,6 +27,7 @@
 /* USER CODE END Includes */
 
 #include <stdio.h>
+#include <stdint.h>
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -160,30 +161,17 @@ void DebugMon_Handler(void)
   */
 
 volatile int tickcnt;
-volatile int pendcnt;
 
-struct ctx_t
+uint32_t *pend_sv_c_handler(uint32_t lr, uint32_t sp)
 {
-  uint32_t lr;
-  uint32_t sp;
-};
+    struct thread_obj_t *gc = g_currt;
 
-struct ctx_t ctx;
-
-struct ctx_t *pend_sv_c_handler(uint32_t lr, uint32_t sp)
-{
-    ctx.lr = lr;
-    ctx.sp = sp;
-
-    ++pendcnt;
+    g_currt->pc = lr;
+    g_currt->psp = sp;
     
     schedule();
 
-    if ((pendcnt % 1000) == 0)
-    {
-        printf("%d %d\n", tickcnt, pendcnt);
-    }
-    return &ctx;
+    return &g_currt->pc;
 }
 
 void __attribute__((naked)) PendSV_Handler(void)
@@ -233,8 +221,16 @@ void SysTick_Handler(void)
   
   ++tickcnt;
   
-  SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-  __DSB();
+  if ((tickcnt % 1000) == 0)
+  {
+    printf("\n%d\n", tickcnt);
+  }
+
+  if ((tickcnt % 10) == 0)
+  {
+    SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+    __DSB();
+  }
 
   /* USER CODE END SysTick_IRQn 1 */
 }

@@ -4,7 +4,7 @@
 
 extern struct thread_obj thread_1;
 
-static dlist_t sched_list;
+static dlist_t sched_list = { &sched_list, &sched_list };
 struct thread_obj *g_currt = &thread_1;
 
 void sched_init()
@@ -33,6 +33,10 @@ extern void *_Anvil_tls_tp;
 
 void schedule()
 {
+    if (dlist_is_empty(&sched_list))
+    {
+        return;
+    }
     if (g_currt)
     {
         sched_add(g_currt, 0);

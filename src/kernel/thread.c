@@ -55,12 +55,17 @@ int kcall_thread_create(struct thread_obj *currt)
     p_thr->stk_sz = 256;
     p_thr->stk = (uint64_t *)malloc(p_thr->stk_sz);
     p_thr->id = 2;
-    p_thr->psp = (uint32_t)(p_thr->stk + p_thr->stk_sz - sizeof(struct regpack));
+    p_thr->psp = (uint32_t)(p_thr->stk + p_thr->stk_sz - 0x70);
     p_thr->tls_ptr = NULL;
 
-    struct regpack *preg = (struct regpack *)(p_thr->stk + p_thr->stk_sz - sizeof(struct regpack));
-    preg->psr = 0x01000000;
-    preg->pc = (unsigned long)PARM2;
+    //struct regpack *preg = (struct regpack *)(p_thr->stk + p_thr->stk_sz - sizeof(struct regpack));
+    //preg->psr = 0x01000000;
+    *((uint32_t *)(p_thr->psp)+15) = 0x01000000;
+    *((uint32_t *)(p_thr->psp)+14) = (unsigned long)PARM1;
+
+    printf("%08lx %08lx\n", *((uint32_t *)p_thr->psp+15), *((uint32_t *)p_thr->psp+14));
+
+    p_thr->pc = (unsigned long)0xffffffac;
 
     sched_add(p_thr, 0);
 

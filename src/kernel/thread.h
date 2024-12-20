@@ -20,9 +20,10 @@ struct thread_obj
     int state;
     struct regpack *reg;
     uint64_t *stk;
-    uint32_t psp;
     size_t stk_sz;
     void *tls_ptr;
+    uint32_t pc;
+    uint32_t psp;
 };
 
 void thread_init();

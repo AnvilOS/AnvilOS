@@ -21,17 +21,27 @@ extern int libc_test();
 
 int func_a(void *arg)
 {
+    int cnt = 0;
     while (1)
     {
-        printf("A");
+        if (++cnt > 1000000)
+        {
+            debug_putc('A');
+            cnt = 0;
+        }
     }
 }
 
 int func_b(void *arg)
 {
+   int cnt = 0;
     while (1)
     {
-        printf("B");
+        if (++cnt > 1000000)
+        {
+            debug_putc('B');
+            cnt = 0;
+        }
     }
 }
 
@@ -53,9 +63,14 @@ int main()
     int tid2;
     int err2 = thrd_create(&tid2, func_b, 1);
 
+   int cnt = 0;
     while (1)
     {
-//        printf("%d\n", ++i);
+        if (++cnt > 1000000)
+        {
+            debug_putc('M');
+            cnt = 0;
+        }
     }
 }
 
