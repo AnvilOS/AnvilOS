@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "stm32u5xx_hal.h"
 
@@ -25,18 +26,23 @@ void thread_init()
 
     __disable_irq();
 
+    // Copy our current stack frame from the MSP (which from
+    // now on will be used for interrupts) to thread1's PSP
     uint64_t *s = (uint64_t *)__get_MSP();
     size_t n = &_estack - (uint64_t *)__get_MSP();
     uint64_t *d = stk1 + THREAD_1_STACK_SIZE - n;
     memcpy(d, s, n * sizeof(uint64_t));
 
-    /* Point the psp at the thread 1 stack */
-    __set_PSP(d);
-    __set_MSP(&_estack);
+    // Point the psp at the thread 1 stack 
+    __set_PSP((uint32_t)d);
+    __set_MSP((uint32_t)&_estack);
     __set_CONTROL(__get_CONTROL() | 2);
 
+    g_currt = &thread_1;
+
     __enable_irq();
-    
+
+    // If we want to run threads unprivileged, uncomment this
     //__set_CONTROL(__get_CONTROL() | 1);
 }
 

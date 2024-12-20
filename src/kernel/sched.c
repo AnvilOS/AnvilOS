@@ -5,7 +5,7 @@
 extern struct thread_obj thread_1;
 
 static dlist_t sched_list;
-static struct thread_obj *g_currt = &thread_1;
+struct thread_obj *g_currt = &thread_1;
 
 void sched_init()
 {
@@ -31,10 +31,14 @@ void sched_add(struct thread_obj *t, int head)
 
 extern void *_Anvil_tls_tp;
 
-void schedule(struct thread_obj *currt)
+void schedule()
 {
-    sched_add(currt, 0);
-    currt->tls_ptr = _Anvil_tls_tp;
+    if (g_currt)
+    {
+        sched_add(g_currt, 0);
+    }
+    g_currt->tls_ptr = _Anvil_tls_tp;
+    // Grab a new thread
     g_currt = (struct thread_obj *)dlist_rem_head(&sched_list);
     _Anvil_tls_tp = g_currt->tls_ptr;
 }

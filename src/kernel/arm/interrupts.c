@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
+#include "sched.h"
+
 #include "main.h"
 #include "stm32u5xx_it.h"
 /* Private includes ----------------------------------------------------------*/
@@ -174,6 +176,8 @@ struct ctx_t *pend_sv_c_handler(uint32_t lr, uint32_t sp)
     ctx.sp = sp;
 
     ++pendcnt;
+    
+    schedule();
 
     if ((pendcnt % 1000) == 0)
     {

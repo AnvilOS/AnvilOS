@@ -13,7 +13,6 @@ BSP_SRCS := \
 	src/main.c \
 	src/system_stm32u5xx.c \
 	src/stm32u5xx_hal_msp.c \
-	src/stm32u5xx_it.c \
 	STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_pwr_ex.c \
 	STM32U5xx_HAL_Driver/Src/stm32u5xx_hal_rcc.c \
 	STM32U5xx_HAL_Driver/Src/stm32u5xx_hal.c \

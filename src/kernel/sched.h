@@ -7,6 +7,8 @@
 void sched_init();
 struct thread_obj *sched_get_currt();
 void sched_add(struct thread_obj *t, int head);
-void schedule(struct thread_obj *currt);
+void schedule();
+
+extern struct thread_obj *g_currt; 
 
 #endif /* SCHED_H_INCLUDED */
