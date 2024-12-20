@@ -20,7 +20,7 @@ TEST(threads, create)
     printf("Creating\n");
     thrd_create(&thr, fast_func, (void *)0x12345678);
     printf("Creating done\n");
-    while (1);
+    //while (1);
 
     END_TEST(threads);
 }

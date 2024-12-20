@@ -10,7 +10,12 @@
         "__locale": "c",
         "stdlib.h": "c",
         "stdio.h": "c",
-        "timer.h": "c"
+        "timer.h": "c",
+        "threads.h": "c",
+        "stm32u5xx_it.h": "c",
+        "main.h": "c",
+        "stm32u5xx_hal.h": "c",
+        "stm32u5xx_hal_conf.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false,
     "makefile.launchConfigurations": [

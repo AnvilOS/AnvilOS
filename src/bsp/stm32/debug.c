@@ -29,7 +29,7 @@ int debug_init()
     return 0;
 }
 
-void debug_putc(int ch)
+int debug_putc(int ch)
 {
     while (!(USART1->SR & USART_SR_TXE))
     {

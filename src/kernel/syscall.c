@@ -6,6 +6,8 @@
 #include <sys/syscalls.h>
 #include <stdio.h>
 
+#include "stm32u5xx_hal.h"
+
 /*
  * This creates an array of function pointers to the syscall handlers
  */
@@ -29,7 +31,7 @@ int kcall_nop(struct thread_obj *t)
     return 0;
 }
 
-void syscall()
+void SVC_Handler()
 {
     /*
      * Syscalls use the std ARM abi to pass parameters
@@ -42,9 +44,16 @@ void syscall()
      * Additionally r0 holds the return value.
      */
 
+    printf("MSP : %08lx\n", __get_MSP());
+    printf("PSP : %08lx\n", __get_PSP());
+    printf("IPSR: %08lx\n", __get_IPSR());
+    printf("CTRL: %08lx\n", __get_CONTROL());
+    printf("PRIM: %08lx\n", __get_PRIMASK());
+    printf("\n");
+
     struct thread_obj *currt = sched_get_currt();
 
-    currt->psp = psp_get();
+    currt->psp = __get_PSP();
     currt->reg = (struct regpack *)(currt->psp);
 
     int syscall = PARM0;

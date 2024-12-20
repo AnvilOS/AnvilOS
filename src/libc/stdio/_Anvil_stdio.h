@@ -40,4 +40,5 @@ int _Anvil_close(int __fd);
 #define O_APPEND        32
 #define O_EXCL          64
 
-#define _Anvil_fputc_unlocked(__c, __f) _Anvil_fputc((__c), (__f))
+#define _Anvil_fputc_unlocked(__c, __f) debug_putc(__c) 
+//_Anvil_fputc((__c), (__f))

@@ -24,6 +24,8 @@
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
 
+#include <stdio.h>
+
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -55,8 +57,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern MDF_HandleTypeDef AdfHandle0;
-extern DMA_HandleTypeDef handle_LPDMA1_Channel0;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -140,19 +141,6 @@ void UsageFault_Handler(void)
 }
 
 /**
-  * @brief This function handles System service call via SWI instruction.
-  */
-void SVC_Handler(void)
-{
-  /* USER CODE BEGIN SVCall_IRQn 0 */
-
-  /* USER CODE END SVCall_IRQn 0 */
-  /* USER CODE BEGIN SVCall_IRQn 1 */
-
-  /* USER CODE END SVCall_IRQn 1 */
-}
-
-/**
   * @brief This function handles Debug monitor.
   */
 void DebugMon_Handler(void)
@@ -168,14 +156,64 @@ void DebugMon_Handler(void)
 /**
   * @brief This function handles Pendable request for system service.
   */
-void PendSV_Handler(void)
+
+volatile int tickcnt;
+volatile int pendcnt;
+
+struct ctx_t
 {
-  /* USER CODE BEGIN PendSV_IRQn 0 */
+  uint32_t lr;
+  uint32_t sp;
+};
 
-  /* USER CODE END PendSV_IRQn 0 */
-  /* USER CODE BEGIN PendSV_IRQn 1 */
+struct ctx_t ctx;
 
-  /* USER CODE END PendSV_IRQn 1 */
+struct ctx_t *pend_sv_c_handler(uint32_t lr, uint32_t sp)
+{
+    ctx.lr = lr;
+    ctx.sp = sp;
+
+    ++pendcnt;
+
+    if ((pendcnt % 1000) == 0)
+    {
+        printf("%d %d\n", tickcnt, pendcnt);
+    }
+    return &ctx;
+}
+
+void __attribute__((naked)) PendSV_Handler(void)
+{
+    __asm
+    (
+        // Figure out which stack we interrupted. In Anvil we
+        // expect it will always be the PSP since all threads 
+        // run in thread mode on the PSP stack.
+        "tst    lr, #0x4  \n"
+        "ite    eq        \n"
+        "mrseq  r1, msp   \n"
+        "mrsne  r1, psp   \n"
+
+        // Push the rest of the registers onto the same stack
+        "stmdb  r1!, {r4-r11} \n"
+
+        // Pass the lr and sp to the c function
+        "mov    r0, lr    \n"   
+        "bl     pend_sv_c_handler   \n"
+
+        // Restore the new lr and sp
+        "ldr    r1, [r0, #4]  \n"
+        "Ldr    lr, [r0, #0]  \n"
+
+        // Pop the manually pushed regs
+        "ldmia  r1!, {r4-r11} \n"
+
+        // Restore the sp
+        "tst  lr, #0x4  \n"
+        "it   ne        \n"
+        "msrne psp, r1  \n"
+        "bx   lr        \n"
+    );
 }
 
 /**
@@ -188,45 +226,11 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
+  
+  ++tickcnt;
+  
+  SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+  __DSB();
 
   /* USER CODE END SysTick_IRQn 1 */
 }
-
-/******************************************************************************/
-/* STM32U5xx Peripheral Interrupt Handlers                                    */
-/* Add here the Interrupt Handlers for the used peripherals.                  */
-/* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_stm32u5xx.s).                    */
-/******************************************************************************/
-
-/**
-  * @brief This function handles ADF interrupt.
-  */
-void ADF1_IRQHandler(void)
-{
-  /* USER CODE BEGIN ADF1_IRQn 0 */
-
-  /* USER CODE END ADF1_IRQn 0 */
-  HAL_MDF_IRQHandler(&AdfHandle0);
-  /* USER CODE BEGIN ADF1_IRQn 1 */
-
-  /* USER CODE END ADF1_IRQn 1 */
-}
-
-/**
-  * @brief This function handles LPDMA1 SmartRun Channel 0 global interrupt.
-  */
-void LPDMA1_Channel0_IRQHandler(void)
-{
-  /* USER CODE BEGIN LPDMA1_Channel0_IRQn 0 */
-
-  /* USER CODE END LPDMA1_Channel0_IRQn 0 */
-  HAL_DMA_IRQHandler(&handle_LPDMA1_Channel0);
-  /* USER CODE BEGIN LPDMA1_Channel0_IRQn 1 */
-
-  /* USER CODE END LPDMA1_Channel0_IRQn 1 */
-}
-
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */

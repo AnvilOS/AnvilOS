@@ -7,10 +7,13 @@
 #include <stdlib.h>
 #include <stdlib.h>
 
+#include "stm32u5xx_hal.h"
+
 struct thread_obj thread_1;
-#define THREAD_1_STACK_SIZE (64)
+#define THREAD_1_STACK_SIZE (1024)
 
 uint64_t stk1[THREAD_1_STACK_SIZE];
+extern uint64_t _estack;
 
 void thread_init()
 {
@@ -20,8 +23,21 @@ void thread_init()
     thread_1.psp = (uint32_t)(thread_1.stk + THREAD_1_STACK_SIZE);
     thread_1.tls_ptr = NULL;
 
+    __disable_irq();
+
+    uint64_t *s = (uint64_t *)__get_MSP();
+    size_t n = &_estack - (uint64_t *)__get_MSP();
+    uint64_t *d = stk1 + THREAD_1_STACK_SIZE - n;
+    memcpy(d, s, n * sizeof(uint64_t));
+
     /* Point the psp at the thread 1 stack */
-    psp_set((uint32_t)thread_1.psp);
+    __set_PSP(d);
+    __set_MSP(&_estack);
+    __set_CONTROL(__get_CONTROL() | 2);
+
+    __enable_irq();
+    
+    //__set_CONTROL(__get_CONTROL() | 1);
 }
 
 int kcall_thread_create(struct thread_obj *currt)
