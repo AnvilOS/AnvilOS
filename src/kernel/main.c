@@ -2,8 +2,8 @@
 #include "debug.h"
 #include "timer.h"
 
-#include <sched.h>
-#include <thread.h>
+#include "ksched.h"
+#include "kthread.h"
 
 #include <stdio.h>
 #include <stdlib.h>

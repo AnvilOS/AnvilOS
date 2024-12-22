@@ -1,5 +1,5 @@
 
-#include "sched.h"
+#include "ksched.h"
 #include "dlist.h"
 
 extern struct thread_obj thread_1;

@@ -1,6 +1,6 @@
 
-#include "syscall.h"
-#include "sched.h"
+#include "ksyscall.h"
+#include "ksched.h"
 
 #include <errno.h>
 #include <sys/syscalls.h>

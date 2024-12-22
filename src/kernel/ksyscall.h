@@ -2,7 +2,7 @@
 #ifndef SYSCALL_H_INCLUDED
 #define SYSCALL_H_INCLUDED
 
-#include "thread.h"
+#include "kthread.h"
 
 /* This creates a list of function prototypes for the syscall handlers */
 #define SYSCALL(func) int func (struct thread_obj *t);

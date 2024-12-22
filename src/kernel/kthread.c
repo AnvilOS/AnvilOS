@@ -1,7 +1,7 @@
 
-#include "thread.h"
-#include "syscall.h"
-#include "sched.h"
+#include "kthread.h"
+#include "ksyscall.h"
+#include "ksched.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,4 +83,3 @@ int kcall_thread_exit(struct thread_obj *currt)
     printf("kcall_thread_exit\n");
     return 0;
 }
-

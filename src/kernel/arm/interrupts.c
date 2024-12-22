@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "sched.h"
+#include "ksched.h"
 
 #include "main.h"
 #include "stm32u5xx_it.h"

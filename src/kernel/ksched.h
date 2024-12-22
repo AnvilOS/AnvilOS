@@ -2,7 +2,7 @@
 #ifndef SCHED_H_INCLUDED
 #define SCHED_H_INCLUDED
 
-#include "thread.h"
+#include "kthread.h"
 
 void sched_init();
 struct thread_obj *sched_get_currt();
