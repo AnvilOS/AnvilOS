@@ -162,16 +162,11 @@ void DebugMon_Handler(void)
 
 volatile int tickcnt;
 
-uint32_t *pend_sv_c_handler(uint32_t lr, uint32_t sp)
+uint32_t *pend_sv_c_handler(/*uint32_t lr,*/ uint32_t sp)
 {
-    struct thread_obj_t *gc = g_currt;
-
-    g_currt->pc = lr;
     g_currt->psp = sp;
-    
     schedule();
-
-    return &g_currt->pc;
+    return g_currt->psp;
 }
 
 void __attribute__((naked)) PendSV_Handler(void)
@@ -183,27 +178,22 @@ void __attribute__((naked)) PendSV_Handler(void)
         // run in thread mode on the PSP stack.
         "tst    lr, #0x4  \n"
         "ite    eq        \n"
-        "mrseq  r1, msp   \n"
-        "mrsne  r1, psp   \n"
+        "mrseq  r0, msp   \n"
+        "mrsne  r0, psp   \n"
 
         // Push the rest of the registers onto the same stack
-        "stmdb  r1!, {r4-r11} \n"
+        "stmdb  r0!, {r4-r11, lr} \n"
 
-        // Pass the lr and sp to the c function
-        "mov    r0, lr    \n"   
+        // Pass the sp to the c function
         "bl     pend_sv_c_handler   \n"
 
-        // Restore the new lr and sp
-        "ldr    r1, [r0, #4]  \n"
-        "Ldr    lr, [r0, #0]  \n"
-
         // Pop the manually pushed regs
-        "ldmia  r1!, {r4-r11} \n"
+        "ldmia  r0!, {r4-r11, lr} \n"
 
         // Restore the sp
         "tst  lr, #0x4  \n"
         "it   ne        \n"
-        "msrne psp, r1  \n"
+        "msrne psp, r0  \n"
         "bx   lr        \n"
     );
 }

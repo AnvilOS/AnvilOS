@@ -18,11 +18,10 @@ struct thread_obj
     dlist_chain_t chain;
     int id;
     int state;
-    struct regpack *reg;
+    struct syscall_regs *reg;
     uint64_t *stk;
     size_t stk_sz;
     void *tls_ptr;
-    uint32_t pc;
     uint32_t psp;
 };
 

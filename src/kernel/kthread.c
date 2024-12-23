@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdlib.h>
 #include <string.h>
+#include <threads.h>
 
 #include "stm32u5xx_hal.h"
 
@@ -55,18 +56,15 @@ int kcall_thread_create(struct thread_obj *currt)
     p_thr->stk_sz = 256;
     p_thr->stk = (uint64_t *)malloc(p_thr->stk_sz);
     p_thr->id = 2;
-    p_thr->psp = (uint32_t)(p_thr->stk + p_thr->stk_sz - 0x70);
+    p_thr->psp = (uint32_t)((struct regpack *)(p_thr->stk + p_thr->stk_sz - sizeof(struct all_regs)));
     p_thr->tls_ptr = NULL;
 
-    //struct regpack *preg = (struct regpack *)(p_thr->stk + p_thr->stk_sz - sizeof(struct regpack));
-    //preg->psr = 0x01000000;
-    *((uint32_t *)(p_thr->psp)+15) = 0x01000000;
-    *((uint32_t *)(p_thr->psp)+14) = (unsigned long)PARM1;
-
-    printf("%08lx %08lx\n", *((uint32_t *)p_thr->psp+15), *((uint32_t *)p_thr->psp+14));
-
-    p_thr->pc = (unsigned long)0xffffffac;
-
+    struct all_regs *preg = p_thr->psp;
+    preg->regpack.psr = 0x01000000;
+    preg->regpack.pc = (unsigned long)PARM1;
+    preg->regpack.lr = (unsigned long)thrd_exit;
+    preg->regpack_manual.lr = (unsigned long)0xffffffac;
+ 
     sched_add(p_thr, 0);
 
     return 0;
@@ -83,3 +81,18 @@ int kcall_thread_exit(struct thread_obj *currt)
     printf("kcall_thread_exit\n");
     return 0;
 }
+
+    // p_thr->psp = (uint32_t)((struct regpack *)(p_thr->stk + p_thr->stk_sz - sizeof(struct regpack)));
+    // p_thr->tls_ptr = NULL;
+
+    // struct regpack *preg = p_thr->psp;
+    // //preg->psr = 0x01000000;
+    // // *((uint32_t *)(p_thr->psp)+15) = 0x01000000;
+    // // *((uint32_t *)(p_thr->psp)+14) = (unsigned long)PARM1;
+
+    // preg->psr = 0x01000000;
+    // preg->pc = (unsigned long)PARM1;
+
+    // printf("%08lx %08lx\n", *((uint32_t *)p_thr->psp+15), *((uint32_t *)p_thr->psp+14));
+
+    // p_thr->pc = (unsigned long)0xffffffac;

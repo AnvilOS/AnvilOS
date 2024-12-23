@@ -54,7 +54,7 @@ void SVC_Handler()
     struct thread_obj *currt = sched_get_currt();
 
     currt->psp = __get_PSP();
-    currt->reg = (struct regpack *)(currt->psp);
+    currt->reg = (struct syscall_regs *)(currt->psp);
 
     int syscall = PARM0;
 
