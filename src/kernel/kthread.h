@@ -21,7 +21,7 @@ struct thread_obj
     int id;
     int state;
     struct syscall_regs *reg;
-    uint64_t *stk;
+    void *stk;
     size_t stk_sz;
     void *tls_ptr;
     uint32_t psp;

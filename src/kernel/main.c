@@ -63,7 +63,7 @@ int main()
     int tid2;
     int err2 = thrd_create(&tid2, func_b, 1);
 
-   int cnt = 0;
+    int cnt = 0;
     while (1)
     {
         if (++cnt > 1000000)

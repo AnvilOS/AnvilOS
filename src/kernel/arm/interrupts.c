@@ -162,7 +162,7 @@ void DebugMon_Handler(void)
 
 volatile int tickcnt;
 
-uint32_t *pend_sv_c_handler(/*uint32_t lr,*/ uint32_t sp)
+uint32_t pend_sv_c_handler(/*uint32_t lr,*/ uint32_t sp)
 {
     g_currt->psp = sp;
     kschedule();
