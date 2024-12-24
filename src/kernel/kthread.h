@@ -11,6 +11,8 @@
 enum
 {
     THR_ST_RUNNING,
+    THR_ST_ZOMBIE,
+    THR_ST_DEAD,
 };
 
 struct thread_obj
@@ -23,8 +25,13 @@ struct thread_obj
     size_t stk_sz;
     void *tls_ptr;
     uint32_t psp;
+    int joinable;
+    struct thread_obj *joiner;
+    void *exit_val;
 };
 
-void thread_init();
+void kthread_init();
+
+extern struct thread_obj *g_currt;
 
 #endif /* THREAD_H_INCLUDED */

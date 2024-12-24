@@ -8,16 +8,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <threads.h>
+#include <errno.h>
+
+#define THREAD_1_STACK_SIZE (1024)
+#define MAX_THREADS 16
 
 #include "stm32u5xx_hal.h"
 
 struct thread_obj thread_1;
-#define THREAD_1_STACK_SIZE (1024)
 
+struct thread_obj *thr_tbl[MAX_THREADS];
+struct thread_obj *g_currt;
 uint64_t stk1[THREAD_1_STACK_SIZE];
 extern uint64_t _estack;
 
-void thread_init()
+void kthread_init()
 {
     thread_1.id = 1;
     thread_1.stk_sz = THREAD_1_STACK_SIZE * sizeof(uint64_t);
@@ -59,13 +64,13 @@ int kcall_thread_create(struct thread_obj *currt)
     p_thr->psp = (uint32_t)((struct regpack *)(p_thr->stk + p_thr->stk_sz - sizeof(struct all_regs)));
     p_thr->tls_ptr = NULL;
 
-    struct all_regs *preg = p_thr->psp;
+    struct all_regs *preg = (struct all_regs *)p_thr->psp;
     preg->regpack.psr = 0x01000000;
     preg->regpack.pc = (unsigned long)PARM1;
     preg->regpack.lr = (unsigned long)thrd_exit;
     preg->regpack_manual.lr = (unsigned long)0xffffffac;
  
-    sched_add(p_thr, 0);
+    ksched_add(p_thr, 0);
 
     return 0;
 }
@@ -82,17 +87,14 @@ int kcall_thread_exit(struct thread_obj *currt)
     return 0;
 }
 
-    // p_thr->psp = (uint32_t)((struct regpack *)(p_thr->stk + p_thr->stk_sz - sizeof(struct regpack)));
-    // p_thr->tls_ptr = NULL;
-
-    // struct regpack *preg = p_thr->psp;
-    // //preg->psr = 0x01000000;
-    // // *((uint32_t *)(p_thr->psp)+15) = 0x01000000;
-    // // *((uint32_t *)(p_thr->psp)+14) = (unsigned long)PARM1;
-
-    // preg->psr = 0x01000000;
-    // preg->pc = (unsigned long)PARM1;
-
-    // printf("%08lx %08lx\n", *((uint32_t *)p_thr->psp+15), *((uint32_t *)p_thr->psp+14));
-
-    // p_thr->pc = (unsigned long)0xffffffac;
+static int find_thread_slot()
+{
+    for (int i=0; i<MAX_THREADS; ++i)
+    {
+        if (thr_tbl[i] == NULL)
+        {
+            return i;
+        }
+    }
+    return -1;
+}

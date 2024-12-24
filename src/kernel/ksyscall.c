@@ -51,7 +51,7 @@ void SVC_Handler()
     printf("PRIM: %08lx\n", __get_PRIMASK());
     printf("\n");
 
-    struct thread_obj *currt = sched_get_currt();
+    struct thread_obj *currt = ksched_get_currt();
 
     currt->psp = __get_PSP();
     currt->reg = (struct syscall_regs *)(currt->psp);

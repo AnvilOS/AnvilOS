@@ -94,8 +94,8 @@ void __libc_init_array()
     x4 = NVIC_GetPriority(PendSV_IRQn);
     printf("PRIO %d %d\n", x3, x4);
 
-    sched_init();
-    thread_init();
+    ksched_init();
+    kthread_init();
 }
 
 int debug_putc(int ch)

@@ -4,10 +4,10 @@
 
 #include "kthread.h"
 
-void sched_init();
-struct thread_obj *sched_get_currt();
-void sched_add(struct thread_obj *t, int head);
-void schedule();
+void ksched_init();
+struct thread_obj *ksched_get_currt();
+void ksched_add(struct thread_obj *t, int head);
+void kschedule();
 
 extern struct thread_obj *g_currt; 
 

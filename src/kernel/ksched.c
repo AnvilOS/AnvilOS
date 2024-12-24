@@ -2,22 +2,19 @@
 #include "ksched.h"
 #include "dlist.h"
 
-extern struct thread_obj thread_1;
-
 static dlist_t sched_list = { &sched_list, &sched_list };
-struct thread_obj *g_currt = &thread_1;
 
-void sched_init()
+void ksched_init()
 {
     dlist_init(&sched_list);
 }
 
-struct thread_obj *sched_get_currt()
+struct thread_obj *ksched_get_currt()
 {
     return g_currt;
 }
 
-void sched_add(struct thread_obj *t, int head)
+void ksched_add(struct thread_obj *t, int head)
 {
     if (head)
     {
@@ -31,7 +28,7 @@ void sched_add(struct thread_obj *t, int head)
 
 extern void *_Anvil_tls_tp;
 
-void schedule()
+void kschedule()
 {
     if (dlist_is_empty(&sched_list))
     {
@@ -39,7 +36,7 @@ void schedule()
     }
     if (g_currt)
     {
-        sched_add(g_currt, 0);
+        ksched_add(g_currt, 0);
     }
     g_currt->tls_ptr = _Anvil_tls_tp;
     // Grab a new thread
