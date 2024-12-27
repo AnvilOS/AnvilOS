@@ -43,31 +43,15 @@ void SVC_Handler()
      *
      * Additionally r0 holds the return value.
      */
-
-    printf("MSP : %08lx\n", __get_MSP());
-    printf("PSP : %08lx\n", __get_PSP());
-    printf("IPSR: %08lx\n", __get_IPSR());
-    printf("CTRL: %08lx\n", __get_CONTROL());
-    printf("PRIM: %08lx\n", __get_PRIMASK());
-    printf("\n");
-
     struct thread_obj *currt = ksched_get_currt();
-
     currt->psp = __get_PSP();
     currt->reg = (struct syscall_regs *)(currt->psp);
-
     int syscall = PARM0;
-
-    printf("r0=%lx r1=%lx r2=%lx\n", PARM1, PARM2, PARM3);
-
     /* Check that the syscall number is valid */
     if (syscall > __enum_kcall_nop)
     {
         RETVAL = -ENOSYS;
         return;
     }
-
     RETVAL = SysCall[syscall](currt);
-
-    //psp_set(pcurrt->psp);
 }

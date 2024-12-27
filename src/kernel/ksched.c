@@ -26,6 +26,15 @@ void ksched_add(struct thread_obj *t, int head)
     }
 }
 
+void ksched_block(int state)
+{
+    g_currt->state = state;
+    if (state != THR_ST_RUNNING)
+    {
+        g_currt = NULL;
+    }
+}
+
 extern void *_Anvil_tls_tp;
 
 void kschedule()
