@@ -11,7 +11,8 @@
 #include <errno.h>
 #include <assert.h>
 
-#define STACK_SIZE (1024)           // In bytes
+//#define STACK_SIZE (1024)           // In bytes
+#define STACK_SIZE (4096)           // In bytes
 
 #define MAX_THREADS 16
 

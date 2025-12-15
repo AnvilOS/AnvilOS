@@ -42,7 +42,8 @@ int func_b(void *arg)
 int main()
 {
     printf("Hello, world\n\r");
-
+    libc_test();
+   
     int tid1;
     int err1 = thrd_create(&tid1, func_a, 1);
 

@@ -91,6 +91,7 @@ void HardFault_Handler(void)
   /* USER CODE BEGIN HardFault_IRQn 0 */
 
   /* USER CODE END HardFault_IRQn 0 */
+    printf("Doh\n");
   while (1)
   {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
@@ -211,7 +212,7 @@ void SysTick_Handler(void)
   
   ++tickcnt;
   
-  if ((tickcnt % 1000) == 0)
+  if ((tickcnt % 100) == 0)
   {
     printf("\n%d\n", tickcnt);
   }

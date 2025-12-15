@@ -62,6 +62,7 @@
 #define __gnuc_va_list unsigned char *
 
 #endif
+#define restrict
 
 #define _Anvil_CtCtl (0x01)
 #define _Anvil_CtSpc (0x02)
@@ -95,10 +96,10 @@ struct                      \
     int __b;                \
 }
 
-long long _Anvil_strtoll(const char *restrict __str,
-                    char **restrict __endptr,
-                    int __base, long long __min,
-                    unsigned long long __max);
+// long long _Anvil_strtoll(const char *restrict __str,
+//                     char **restrict __endptr,
+//                     int __base, long long __min,
+//                     unsigned long long __max);
 
 double _Anvil_strtod(const char *restrict nptr, char **restrict endptr);
 
