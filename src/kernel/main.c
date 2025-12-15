@@ -74,5 +74,9 @@ void __libc_init_array()
 
 int debug_putc(int ch)
 {
+    if (ch == '\n')
+    {
+    	__io_putchar('\r');
+    }
 	__io_putchar(ch);
 }
