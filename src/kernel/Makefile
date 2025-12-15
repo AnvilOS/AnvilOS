@@ -3,7 +3,7 @@ BINARY := anvil
 
 LIBS := ../bsp/libbsp.a
 
-EXTRA_DEPS := ../libc/libc.a arm/lnfile.ld
+EXTRA_DEPS := ../lib/libc/libc.a arm/lnfile.ld
 
 MODULE_LDFLAGS := \
     -nostartfiles \

@@ -2,7 +2,7 @@
 
 PROJECT_ROOT := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-SUBDIRS = $(PROJECT_ROOT)/bsp $(PROJECT_ROOT)/libc $(PROJECT_ROOT)/kernel
+SUBDIRS = $(PROJECT_ROOT)/bsp $(PROJECT_ROOT)/lib/libc $(PROJECT_ROOT)/kernel
 
 #ifeq ($(wildcard target.mk),)
 #$(warning "*** ERROR: target not specified")
